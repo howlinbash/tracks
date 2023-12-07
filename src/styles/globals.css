@@ -1,3 +1,32 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+html, body {
+  @apply w-full h-full;
+}
+
+body {
+  @apply bg-stone-900 text-stone-200 m-0;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-weight: bold;
+}
+
+h1 {
+  @apply text-4xl;
+}
+
+h2 {
+  @apply text-3xl;
+}
+
+main {
+  @apply w-full h-full overflow-x-hidden;
+  ::-webkit-scrollbar {
+    display: none;
+  }
+}
