@@ -1,20 +1,60 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
     provider = "prisma-client-js"
 }
 
 datasource db {
-    provider = "sqlite"
-    url      = env("DATABASE_URL")
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
-model Post {
-    id        Int      @id @default(autoincrement())
-    name      String
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+enum EraEnum {
+  TWENTIES
+  TEENIES
+  NOUGHTIES
+  NINETIES
+  EIGHTIES
+  SEVENTIES
+  SIXTIES
+  FIFTIES
+  FORTIES
+  THIRTIES
+}
 
-    @@index([name])
+model Song {
+  id       Int    @id @default(autoincrement())
+  label    String
+  path     String
+  eraId    Int
+  era      Era    @relation(fields: [eraId], references: [id])
+  genreId  Int
+  genre    Genre  @relation(fields: [genreId], references: [id])
+  artistId Int
+  artist   Artist @relation(fields: [artistId], references: [id])
+
+  @@unique([label, artistId])
+  @@map("songs")
+}
+
+model Era {
+  id    Int     @id @default(autoincrement())
+  label EraEnum @unique
+  songs Song[]
+
+  @@map("eras")
+}
+
+model Genre {
+  id    Int    @id @default(autoincrement())
+  label String @unique
+  songs Song[]
+
+  @@map("genres")
+}
+
+model Artist {
+  id    Int    @id @default(autoincrement())
+  label String @unique
+  songs Song[]
+
+  @@map("artists")
 }
