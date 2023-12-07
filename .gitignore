@@ -40,3 +40,9 @@ yarn-error.log*
 
 # typescript
 *.tsbuildinfo
+
+# vim
+Session.vim
+
+# run scripts
+scripts/load-db.js

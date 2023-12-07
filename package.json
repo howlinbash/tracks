@@ -2,11 +2,11 @@
   "name": "sing",
   "version": "0.1.0",
   "private": true,
-  "type": "module",
   "scripts": {
     "build": "next build",
     "db:push": "prisma db push",
     "db:studio": "prisma studio",
+    "db:load": "./scripts/load-db.sh",
     "dev": "next dev",
     "postinstall": "prisma generate",
     "lint": "next lint",
