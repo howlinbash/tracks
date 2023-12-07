@@ -18,6 +18,8 @@ enum EraEnum {
   FIFTIES
   FORTIES
   THIRTIES
+  NINETWENTIES
+  N_A
 }
 
 model Song {
