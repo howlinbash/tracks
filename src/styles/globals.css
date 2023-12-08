@@ -26,7 +26,8 @@ h2 {
 
 main {
   @apply w-full h-full overflow-x-hidden;
-  ::-webkit-scrollbar {
-    display: none;
-  }
+}
+
+::-webkit-scrollbar {
+  display: none;
 }
