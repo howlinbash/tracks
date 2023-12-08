@@ -22,9 +22,25 @@ const FilterList = ({ category }: FilterListProps) => {
   )
 }
 
-export default function Browser() {
+const SongList = () => {
   const { data: songs, isLoading } = api.song.getSongs.useQuery();
+  return (
+      <div className="h-full w-full overflow-y-scroll">
+        <table className="w-full">
+          {isLoading ? "..." : songs?.map((song) => (
+            <tr className="flex w-full py-1 pl-6 text-left" key={song.id}>
+              <td className="w-full">{eraEnum[song.era as EraEnum]}</td>
+              <td className="w-full">{song.genre}</td>
+              <td className="w-full">{song.artist}</td>
+              <td className="w-full">{song.song}</td>
+            </tr>
+          ))}
+        </table>
+      </div>
+  );
+}
 
+export default function Browser() {
   return (
     <main className="grid w-full h-screen gap-2.5 grid-rows-[auto_1fr_1fr]">
       <div className="grid grid-cols-[1fr_1fr_1fr] w-full pt-4 items-center">
@@ -33,21 +49,11 @@ export default function Browser() {
         <div />
       </div>
       <div className="grid w-full h-[45vh] gap-px grid-cols-[1fr_1fr_1fr]">
-        {isLoading ? "..." : (
-          <>
-            <FilterList category={ERAS} />
-            <FilterList category={GENRES} />
-            <FilterList category={ARTISTS} />
-          </>
-        )}
+        <FilterList category={ERAS} />
+        <FilterList category={GENRES} />
+        <FilterList category={ARTISTS} />
       </div>
-      <div className="h-full w-full overflow-y-scroll">
-        <ul className="">
-          {isLoading ? "..." : songs?.map((song) => (
-            <li className="py-1 pl-6" key={song.id}>{song.label}</li>
-          ))}
-        </ul>
-      </div>
+      <SongList />
     </main>
   );
 }
