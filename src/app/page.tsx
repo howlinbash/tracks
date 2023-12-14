@@ -1,58 +1,14 @@
 import { api } from "~/trpc/server";
-import { type FilterListProps } from "../types";
-import { eraEnum } from "./enums";
-import { type EraEnum } from "@prisma/client";
 import { ERAS, GENRES, ARTISTS } from "~/constants";
-import { type RouterOutputs } from "~/trpc/shared";
-import CategoryFilter from "./_components/category-filter";
-
-const FilterList = async ({ category }: FilterListProps) => {
-  const filters = await api.filter.getFilters.query({
-    category,
-  });
-
-  return (
-    <div className="h-full w-full overflow-y-scroll">
-      <ul className="list-none p-0">
-        {!filters
-          ? "..."
-          : filters.map((filter) => (
-            <CategoryFilter category={category} filter={filter} />
-          ))}
-      </ul>
-    </div>
-  );
-};
-
-type Song = RouterOutputs["song"]["getSongs"][number];
-
-const SongRow = ({ song }: { song?: Song }) => (
-  <tr className="flex w-full py-1 pl-6 text-left" key={song?.id ?? "0"}>
-    <td className="w-full">{song ? eraEnum[song.era as EraEnum] : ""}</td>
-    <td className="w-full">{song?.genre}</td>
-    <td className="w-full">{song?.artist}</td>
-    <td className="w-full">{song?.song}</td>
-  </tr>
-);
-
-const SongList = async () => {
-  const songs = await api.song.getSongs.query();
-  return (
-    <div className="h-full w-full overflow-y-scroll">
-      <table className="w-full">
-        <tbody>
-          {!songs ? (
-            <SongRow />
-          ) : (
-            songs?.map((song) => <SongRow song={song} />)
-          )}
-        </tbody>
-      </table>
-    </div>
-  );
-};
+import FilterList from "./_components/filter-list";
+import SongList from "./_components/song-list";
 
 export default async function Home() {
+  void api.song.getSongs.query();
+  void api.filter.getFilters.query({ category: ERAS });
+  void api.filter.getFilters.query({ category: GENRES });
+  void api.filter.getFilters.query({ category: ARTISTS });
+
   return (
     <main className="grid h-screen w-full grid-rows-[auto_1fr_1fr] gap-2.5">
       <div className="grid w-full grid-cols-[1fr_1fr_1fr] items-center pt-4">
