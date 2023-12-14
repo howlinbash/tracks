@@ -1,5 +1,5 @@
 import { api } from "~/trpc/server";
-import { type FilterListProps } from "./types";
+import { type FilterListProps } from "../types";
 import { eraEnum } from "./enums";
 import { type EraEnum } from "@prisma/client";
 import { ERAS, GENRES, ARTISTS } from "~/constants";

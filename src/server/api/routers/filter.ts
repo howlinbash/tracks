@@ -4,13 +4,23 @@ import { ERAS, GENRES, ARTISTS, CategoryIdDict } from "~/constants";
 
 const category = z.literal(ERAS).or(z.literal(GENRES)).or(z.literal(ARTISTS));
 
+
 export const filterRouter = createTRPCRouter({
   getFilters: publicProcedure
     .input(z.object({ category }))
-    .query(({ ctx, input }) => {
+    .query(async ({ ctx, input }) => {
+      const filters = await ctx.db.filter.findFirst({})
       switch (input.category) {
-        case ERAS:
-          return ctx.db.era.findMany({})
+        case ERAS: {
+          const eras = await ctx.db.era.findMany({})
+          if (filters?.eraId) {
+            const activeFilter = eras.find(filter => filters.eraId === filter.id)
+            if (activeFilter) {
+              activeFilter.active = true;
+            }
+          }
+          return eras;
+        }
         case GENRES:
           return ctx.db.genre.findMany({})
         case ARTISTS:
