@@ -1,5 +1,5 @@
 generator client {
-    provider = "prisma-client-js"
+  provider = "prisma-client-js"
 }
 
 datasource db {
@@ -59,4 +59,13 @@ model Artist {
   songs Song[]
 
   @@map("artists")
+}
+
+model Filter {
+  id       Int @id @default(autoincrement())
+  eraId    Int?
+  genreId  Int?
+  artistId Int?
+
+  @@map("filters")
 }

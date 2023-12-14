@@ -3,6 +3,14 @@ import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
 async function main() {
+  await prisma.filter.create({
+    data: {
+      eraId: null,
+      genreId: null,
+      artistId: null,
+    }
+  });
+
   await prisma.era.createMany({
     data: [
       { label: 'TWENTIES' },
