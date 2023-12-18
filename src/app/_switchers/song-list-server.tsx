@@ -1,8 +1,10 @@
-"use client"
+"use server"
 
 import { eraEnum } from "../enums";
 import { type EraEnum } from "@prisma/client";
-import type { Song } from "~/types";
+import { type RouterOutputs } from "~/trpc/shared";
+
+type Song = RouterOutputs["song"]["getSongs"][number];
 
 const SongRow = ({ song }: { song?: Song }) => (
   <tr className="flex w-full py-1 pl-6 text-left" key={song?.id ?? "0"}>
@@ -13,11 +15,9 @@ const SongRow = ({ song }: { song?: Song }) => (
   </tr>
 );
 
-export type SongListProps = { items?: Song[] };
-
-const SongList = ({ items: songs }: SongListProps) => {
+const SongListServer = ({ songs }: { songs: Song[] }) => {
   return (
-    <div className="h-full w-full overflow-y-scroll">
+    <div className="h-full w-full overflow-y-scroll text-stone-400">
       <table className="w-full">
         <tbody>
           {!songs ? (
@@ -31,4 +31,4 @@ const SongList = ({ items: songs }: SongListProps) => {
   );
 };
 
-export default SongList;
+export default SongListServer;
