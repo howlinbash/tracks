@@ -23,50 +23,50 @@ enum EraEnum {
 }
 
 model Song {
-  id       Int    @id @default(autoincrement())
+  id       Int      @id @default(autoincrement())
   label    String
   path     String
   eraId    Int
-  era      Era    @relation(fields: [eraId], references: [id])
+  era      Era      @relation(fields: [eraId], references: [id])
   genreId  Int
-  genre    Genre  @relation(fields: [genreId], references: [id])
+  genre    Genre    @relation(fields: [genreId], references: [id])
   artistId Int
-  artist   Artist @relation(fields: [artistId], references: [id])
-  active Boolean?
+  artist   Artist   @relation(fields: [artistId], references: [id])
+  active   Boolean?
 
   @@unique([label, artistId])
   @@map("songs")
 }
 
 model Era {
-  id    Int     @id @default(autoincrement())
-  label EraEnum @unique
-  songs Song[]
+  id     Int      @id @default(autoincrement())
+  label  EraEnum  @unique
+  songs  Song[]
   active Boolean?
 
   @@map("eras")
 }
 
 model Genre {
-  id    Int    @id @default(autoincrement())
-  label String @unique
-  songs Song[]
+  id     Int      @id @default(autoincrement())
+  label  String   @unique
+  songs  Song[]
   active Boolean?
 
   @@map("genres")
 }
 
 model Artist {
-  id    Int    @id @default(autoincrement())
-  label String @unique
-  songs Song[]
+  id     Int      @id @default(autoincrement())
+  label  String   @unique
+  songs  Song[]
   active Boolean?
 
   @@map("artists")
 }
 
 model Filter {
-  id       Int @id @default(autoincrement())
+  id       Int  @id @default(autoincrement())
   eraId    Int?
   genreId  Int?
   artistId Int?
