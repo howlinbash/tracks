@@ -4,7 +4,6 @@ import { ERAS, GENRES, ARTISTS, CategoryIdDict } from "~/constants";
 
 const category = z.literal(ERAS).or(z.literal(GENRES)).or(z.literal(ARTISTS));
 
-
 export const filterRouter = createTRPCRouter({
   getFilters: publicProcedure
     .input(z.object({ category }))
@@ -21,10 +20,26 @@ export const filterRouter = createTRPCRouter({
           }
           return eras;
         }
-        case GENRES:
-          return ctx.db.genre.findMany({})
-        case ARTISTS:
-          return ctx.db.artist.findMany({})
+        case GENRES: {
+          const genres = await ctx.db.genre.findMany({})
+          if (filters?.genreId) {
+            const activeFilter = genres.find(filter => filters.genreId === filter.id)
+            if (activeFilter) {
+              activeFilter.active = true;
+            }
+          }
+          return genres;
+        }
+        case ARTISTS: {
+          const artists = await ctx.db.artist.findMany({})
+          if (filters?.artistId) {
+            const activeFilter = artists.find(filter => filters.artistId === filter.id)
+            if (activeFilter) {
+              activeFilter.active = true;
+            }
+          }
+          return artists;
+        }
       }
     }),
 
@@ -35,12 +50,15 @@ export const filterRouter = createTRPCRouter({
     }))
     .mutation(async ({ ctx, input }) => {
       const { category, filterId } = input;
+      const filter = await ctx.db.filter.findFirst();
+      
+      const catId = CategoryIdDict[category];
       const res = await ctx.db.filter.update({
         where: {
           id: 1,
         },
         data: {
-          [CategoryIdDict[category]]: filterId,
+          [catId]: filter?.[catId] === filterId ? null : filterId,
         },
       })
       return res;

@@ -11,7 +11,7 @@ export const CategoryFilterBody = ({ category, filter, handleClick }: CategoryFi
   return (
     <li key={filter.id}>
       <div
-        className={`m-0 w-full py-4 pl-6 pr-0 text-left text-lg${filter.active && " bg-blue-950"
+        className={`m-0 w-full py-4 pl-6 pr-0 text-left text-lg ${filter.active && "bg-blue-950"
           }`}
         onClick={handleClick}
       >
@@ -25,9 +25,11 @@ export const CategoryFilterBody = ({ category, filter, handleClick }: CategoryFi
 };
 
 const CategoryFilter = ({ category, filter }: CategoryFilterProps) => {
+  const utils = api.useUtils()
   const setFilter = api.filter.setFilter.useMutation({
     onSuccess: (res) => {
       console.log({ res });
+      void utils.filter.getFilters.invalidate()
     },
   });
 
