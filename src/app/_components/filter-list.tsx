@@ -27,9 +27,9 @@ export const CategoryFilterBody = ({ category, filter, handleClick }: CategoryFi
 const CategoryFilter = ({ category, filter }: CategoryFilterProps) => {
   const utils = api.useUtils()
   const setFilter = api.filter.setFilter.useMutation({
-    onSuccess: (res) => {
-      console.log({ res });
+    onSuccess: () => {
       void utils.filter.getFilters.invalidate()
+      void utils.song.getSongs.invalidate()
     },
   });
 
