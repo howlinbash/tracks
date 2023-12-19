@@ -14,13 +14,13 @@ export default async function Home() {
   const artists = await api.filter.getFilters.query({ category: ARTISTS });
 
   return (
-    <main className="grid h-screen w-full grid-rows-[auto_1fr_1fr] gap-2.5">
-      <div className="grid w-full grid-cols-[1fr_1fr_1fr] items-center pt-4">
+    <main className="grid h-screen w-full grid-rows-[auto_1fr_1fr] gap-4 py-4">
+      <div className="grid w-full grid-cols-[1fr_1fr_1fr] items-center">
         <h2 className="pl-5">Howlin Tracks</h2>
-        <p className="justify-self-center">?? Songs</p>
+        <span className="justify-self-center"></span>
         <div />
       </div>
-      <div className="grid h-[45vh] w-full grid-cols-[1fr_1fr_1fr] gap-px">
+      <div className="grid h-[45vh] w-full grid-cols-[1fr_1fr_1fr] gap-4 px-4">
         <FilterSwitcher category={ERAS} Component={FilterList}>
           <FilterListServer category={ERAS} filters={eras} />
         </FilterSwitcher>

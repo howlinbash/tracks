@@ -11,7 +11,7 @@ export const CategoryFilterBody = ({ category, filter, handleClick }: CategoryFi
   return (
     <li key={filter.id}>
       <div
-        className={`m-0 w-full py-4 pl-6 pr-0 text-left text-lg ${filter.active && "bg-blue-950"
+        className={`m-0 w-full py-1 pl-4 pr-0 text-left ${filter.active && "bg-blue-950"
           }`}
         onClick={handleClick}
       >
@@ -19,7 +19,6 @@ export const CategoryFilterBody = ({ category, filter, handleClick }: CategoryFi
           {category === ERAS ? eraEnum[filter.label as EraEnum] : filter.label}
         </span>
       </div>
-      <hr className="m-0 ml-6 h-px bg-stone-200" />
     </li>
   );
 };
@@ -45,7 +44,7 @@ const CategoryFilter = ({ category, filter }: CategoryFilterProps) => {
 
 const FilterList = ({ category, filters }: FilterListProps) => {
   return (
-    <div className="h-full w-full overflow-y-scroll">
+    <div className="h-full w-full overflow-y-scroll bg-slate-800">
       <ul className="list-none p-0">
         {filters.map((filter) => (
           <CategoryFilter category={category} filter={filter} />

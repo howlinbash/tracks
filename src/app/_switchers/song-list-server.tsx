@@ -1,10 +1,8 @@
 "use server"
 
-import { eraEnum } from "../enums";
 import { type EraEnum } from "@prisma/client";
-import { type RouterOutputs } from "~/trpc/shared";
-
-type Song = RouterOutputs["song"]["getSongs"][number];
+import { eraEnum } from "../enums";
+import type { Song } from "~/types";
 
 const SongRow = ({ song }: { song?: Song }) => (
   <tr className="flex w-full py-1 pl-6 text-left" key={song?.id ?? "0"}>
@@ -17,15 +15,17 @@ const SongRow = ({ song }: { song?: Song }) => (
 
 const SongListServer = ({ songs }: { songs: Song[] }) => {
   return (
-    <div className="h-full w-full overflow-y-scroll text-stone-400">
-      <table className="w-full">
-        <tbody>
-          {!songs ? (
-            <SongRow />
-          ) : (
-            songs?.map((song) => <SongRow song={song} />)
-          )}
-        </tbody>
+    <div className="w-full overflow-y-scroll px-4">
+      <table className="w-full h-full">
+        <thead className="sticky top-0 bg-slate-900">
+          <tr className="flex w-full py-2 pl-6 text-left">
+            <th className="w-full">Era</th>
+            <th className="w-full">Genre</th>
+            <th className="w-full">Artist</th>
+            <th className="w-full">Song</th>
+          </tr>
+        </thead>
+        <tbody>{songs?.map((song) => <SongRow song={song} />)}</tbody>
       </table>
     </div>
   );

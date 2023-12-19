@@ -7,7 +7,7 @@ html, body {
 }
 
 body {
-  @apply bg-stone-900 text-stone-200 m-0;
+  @apply bg-slate-900 text-stone-200 m-0;
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
 
 }
