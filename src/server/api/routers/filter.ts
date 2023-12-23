@@ -1,8 +1,8 @@
 import { z } from "zod";
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
-import { ERAS, GENRES, ARTISTS, CategoryIdDict } from "~/constants";
-
-const category = z.literal(ERAS).or(z.literal(GENRES)).or(z.literal(ARTISTS));
+import { ERAS, GENRES, ARTISTS } from "~/constants";
+import type { Record } from "@prisma/client/runtime/library";
+import type { Artist, Era, Genre } from "@prisma/client";
 
 type WhereSongs = {
   eraId?: number;
@@ -10,7 +10,162 @@ type WhereSongs = {
   artistId?: number;
 };
 
+type EraGraph<T> = {
+  genres: T;
+  artists: T;
+};
+
+type GenreGraph<T> = { all: T } & Record<string, T>;
+
+type CatGraph<T> = {
+  allIds: number[];
+  byId: Record<string, T>;
+};
+
+type FilterGraph = {
+  eras: CatGraph<Era & EraGraph<number[]>>;
+  genres: CatGraph<Genre & { artists: GenreGraph<number[]> }>;
+  artists: CatGraph<Artist>;
+};
+
+type FilterSets = {
+  eras: Record<string, EraGraph<Set<number>>>;
+  genres: Record<string, GenreGraph<Set<number>>>;
+};
+
+const category = z.literal(ERAS).or(z.literal(GENRES)).or(z.literal(ARTISTS));
+
+/*
+ * Unitl I improve my typing, use this map to navigate the graphs
+ *
+ *
+ * const filterGraph: unknown = {
+ *   eras: {
+ *     allIds: [],
+ *     byId: {
+ *       "eraId": {
+ *         ...era,
+ *         artists: [],
+ *         genres: []
+ *       }
+ *     }
+ *   },
+ *   genres: {
+ *     allIds: [],
+ *     byId: {
+ *       "genreId": {
+ *         ...genre,
+ *         artists: {
+ *           all: [],
+ *           '90s': [],
+ *           '00s': []
+ *         },
+ *       }
+ *     }
+ *   },
+ *   artists: {
+ *     allIds: [],
+ *     byId: {
+ *       "artistId": { ...artist }
+ *     }
+ *   },
+ * };
+ * 
+ * const filterSets = {
+ *   eras: {
+ *     "1": {
+ *       artists: new Set(),
+ *       genres: new Set(),
+ *     }
+ *   },
+ *   genres: {
+ *     "genreId": {
+ *       all: new Set(),
+ *       '90s': new Set(),
+ *       '00s': new Set(),
+ *     },
+ *   },
+ * };
+ *
+ */
+
 export const filterRouter = createTRPCRouter({
+  getFilterGraph: publicProcedure.query(async ({ ctx }) => {
+    const filterGraph: FilterGraph = {
+      eras: {
+        allIds: [],
+        byId: {},
+      },
+      genres: {
+        allIds: [],
+        byId: {},
+      },
+      artists: {
+        allIds: [],
+        byId: {},
+      },
+    };
+    const filterSets: FilterSets = {
+      eras: {},
+      genres: {},
+    };
+    const songs = await ctx.db.song.findMany({});
+    const eras = await ctx.db.era.findMany({});
+    const genres = await ctx.db.genre.findMany({});
+    const artists = await ctx.db.artist.findMany({});
+
+    eras.forEach((era) => {
+      filterGraph.eras.allIds.push(era.id);
+      filterGraph.eras.byId[era.id] = { ...era, artists: [], genres: [] };
+      filterSets.eras[era.id] = {
+        artists: new Set<number>(),
+        genres: new Set<number>(),
+      };
+    });
+    genres.forEach((genre) => {
+      filterGraph.genres.allIds.push(genre.id);
+      filterGraph.genres.byId[genre.id] = { ...genre, artists: { all: [] } };
+      filterSets.genres[genre.id] = { all: new Set<number>() };
+    });
+    artists.forEach((artist) => {
+      filterGraph.artists.allIds.push(artist.id);
+      filterGraph.artists.byId[artist.id] = artist;
+    });
+
+    songs.forEach(({ eraId, genreId, artistId }) => {
+      const eraSets = filterSets.eras[eraId];
+      eraSets!.genres.add(genreId);
+      eraSets!.artists.add(artistId);
+
+      const genreSets = filterSets.genres[genreId];
+      if (genreSets![eraId] instanceof Set) {
+        genreSets![eraId]!.add(artistId);
+      } else {
+        const newSet = new Set<number>();
+        newSet.add(artistId);
+        filterSets.genres[genreId]![eraId] = newSet;
+        filterSets.genres[genreId]!.all.add(artistId);
+      }
+    });
+
+    Object.entries(filterSets.eras).forEach(([eraId, graph]) => {
+      Object.entries(graph).forEach(([category, set]) => {
+        filterGraph.eras.byId[eraId]![category as "genres" | "artists"] =
+          Array.from(set).sort((a, b) => a - b);
+      });
+    });
+
+    Object.entries(filterSets.genres).forEach(([genreId, graph]) => {
+      Object.entries(graph).forEach(([artistKey, set]) => {
+        filterGraph.genres.byId[genreId]!.artists[artistKey] = Array.from(
+          set,
+        ).sort((a, b) => a - b);
+      });
+    });
+
+    return filterGraph;
+  }),
+
   getFilters: publicProcedure
     .input(z.object({ category }))
     .query(async ({ ctx, input }) => {
@@ -51,8 +206,8 @@ export const filterRouter = createTRPCRouter({
               songs: {
                 some: whereSongs.eraId
                   ? {
-                      eraId: whereSongs.eraId,
-                    }
+                    eraId: whereSongs.eraId,
+                  }
                   : {},
               },
             },
@@ -88,26 +243,39 @@ export const filterRouter = createTRPCRouter({
       }
     }),
 
-  setFilter: publicProcedure
+  getEras: publicProcedure.query(async ({ ctx }) => {
+    const eras = await ctx.db.era.findMany({});
+    return eras;
+  }),
+
+  getGenres: publicProcedure.query(async ({ ctx }) => {
+    const genres = await ctx.db.genre.findMany({});
+    return genres;
+  }),
+
+  getArtists: publicProcedure.query(async ({ ctx }) => {
+    const artists = await ctx.db.artist.findMany({});
+    return artists;
+  }),
+
+  postFilter: publicProcedure
     .input(
       z.object({
-        category,
-        filterId: z.number(),
+        eras: z.number().or(z.null()),
+        genres: z.number().or(z.null()),
+        artists: z.number().or(z.null()),
       }),
     )
-    .mutation(async ({ ctx, input }) => {
-      const { category, filterId } = input;
-      const filter = await ctx.db.filter.findFirst();
-
-      const catId = CategoryIdDict[category];
-      const res = await ctx.db.filter.update({
+    .mutation(async ({ ctx, input }) =>
+      await ctx.db.filter.update({
         where: {
           id: 1,
         },
         data: {
-          [catId]: filter?.[catId] === filterId ? null : filterId,
+          eraId: input.eras,
+          genreId: input.genres,
+          artistId: input.artists,
         },
-      });
-      return res;
-    }),
+      })
+    ),
 });

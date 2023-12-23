@@ -2,19 +2,19 @@
 
 import { api } from "~/trpc/react";
 import type { ComponentType, ReactNode } from "react";
-import type { Category, FilterListProps } from "~/types";
+import type { FilterListsProps } from "~/types";
 
 type SwitcherProps<T> = {
-  children: ReactNode
-  Component: ComponentType<T>
-  category: Category
-}
+  children: ReactNode;
+  Component: ComponentType<T>;
+};
 
-const FilterSwitcher = ({ children, Component, category }: SwitcherProps<FilterListProps>) => {
-  const { data, isLoading } = api.filter.getFilters.useQuery({
-    category,
-  });
-  return isLoading ? children : <Component filters={data!} category={category} />;
+const FilterSwitcher = ({
+  children,
+  Component,
+}: SwitcherProps<FilterListsProps>) => {
+  const { data, isLoading } = api.filter.getFilterGraph.useQuery();
+  return isLoading ? children : <Component filterGraph={data!} />;
 };
 
 export default FilterSwitcher;

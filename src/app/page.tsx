@@ -1,17 +1,14 @@
 import { api } from "~/trpc/server";
-import { ERAS, GENRES, ARTISTS } from "~/constants";
-import FilterList from "./_components/filter-list";
+import FilterLists from "./_components/filter-lists";
 import SongList from "./_components/song-list";
 import SongSwitcher from "./_switchers/song-switcher";
 import FilterSwitcher from "./_switchers/filter-switcher";
 import SongListServer from "./_switchers/song-list-server";
-import FilterListServer from "./_switchers/filter-list-server";
+import FilterListsServer from "./_switchers/filter-lists-server";
 
 export default async function Home() {
   const songs = await api.song.getSongs.query();
-  const eras = await api.filter.getFilters.query({ category: ERAS });
-  const genres = await api.filter.getFilters.query({ category: GENRES });
-  const artists = await api.filter.getFilters.query({ category: ARTISTS });
+  const filterGraph = await api.filter.getFilterGraph.query();
 
   return (
     <main className="grid h-screen w-full grid-rows-[auto_1fr_1fr] gap-4 py-4">
@@ -21,14 +18,8 @@ export default async function Home() {
         <div />
       </div>
       <div className="grid h-[45vh] w-full grid-cols-[1fr_1fr_1fr] gap-4 px-4">
-        <FilterSwitcher category={ERAS} Component={FilterList}>
-          <FilterListServer category={ERAS} filters={eras} />
-        </FilterSwitcher>
-        <FilterSwitcher category={GENRES} Component={FilterList}>
-          <FilterListServer category={GENRES} filters={genres} />
-        </FilterSwitcher>
-        <FilterSwitcher category={ARTISTS} Component={FilterList}>
-          <FilterListServer category={ARTISTS} filters={artists} />
+        <FilterSwitcher Component={FilterLists}>
+          <FilterListsServer filterGraph={filterGraph} />
         </FilterSwitcher>
       </div>
       <SongSwitcher Component={SongList}>
