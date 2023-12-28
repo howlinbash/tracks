@@ -70,7 +70,7 @@ const category = z.literal(ERAS).or(z.literal(GENRES)).or(z.literal(ARTISTS));
  *     }
  *   },
  * };
- * 
+ *
  * const filterSets = {
  *   eras: {
  *     "1": {
@@ -144,8 +144,8 @@ export const filterRouter = createTRPCRouter({
         const newSet = new Set<number>();
         newSet.add(artistId);
         filterSets.genres[genreId]![eraId] = newSet;
-        filterSets.genres[genreId]!.all.add(artistId);
       }
+      filterSets.genres[genreId]!.all.add(artistId);
     });
 
     Object.entries(filterSets.eras).forEach(([eraId, graph]) => {
@@ -243,39 +243,25 @@ export const filterRouter = createTRPCRouter({
       }
     }),
 
-  getEras: publicProcedure.query(async ({ ctx }) => {
-    const eras = await ctx.db.era.findMany({});
-    return eras;
-  }),
-
-  getGenres: publicProcedure.query(async ({ ctx }) => {
-    const genres = await ctx.db.genre.findMany({});
-    return genres;
-  }),
-
-  getArtists: publicProcedure.query(async ({ ctx }) => {
-    const artists = await ctx.db.artist.findMany({});
-    return artists;
-  }),
-
   postFilter: publicProcedure
     .input(
       z.object({
-        eras: z.number().or(z.null()),
-        genres: z.number().or(z.null()),
-        artists: z.number().or(z.null()),
+        eras: z.union([z.number(), z.null()]),
+        genres: z.union([z.number(), z.null()]),
+        artists: z.union([z.number(), z.null()]),
       }),
     )
-    .mutation(async ({ ctx, input }) =>
-      await ctx.db.filter.update({
-        where: {
-          id: 1,
-        },
-        data: {
-          eraId: input.eras,
-          genreId: input.genres,
-          artistId: input.artists,
-        },
-      })
+    .mutation(
+      async ({ ctx, input }) =>
+        await ctx.db.filter.update({
+          where: {
+            id: 1,
+          },
+          data: {
+            eraId: input.eras,
+            genreId: input.genres,
+            artistId: input.artists,
+          },
+        }),
     ),
 });

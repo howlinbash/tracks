@@ -2,9 +2,9 @@
 
 import type {
   Category,
-  CategoryFilterBodyProps,
   CategoryFilterProps,
   FilterGraph,
+  FilterListProps,
   FilterListsProps,
   Filters,
 } from "~/types";
@@ -12,21 +12,60 @@ import { api } from "~/trpc/react";
 import { eraEnum } from "../enums";
 import { type EraEnum } from "@prisma/client";
 import { ERAS } from "~/constants";
-import { useState, type MouseEvent } from "react";
+import {
+  type MouseEvent,
+  type KeyboardEvent,
+  useState,
+  useEffect,
+} from "react";
+import { useDebouncedCallback } from "use-debounce";
+
+const setFilterState =
+  (category: Category, filterId: number) => (state: Filters) => {
+    let nextState = state;
+
+    switch (category) {
+      case "eras": {
+        nextState = {
+          eras: state.eras === filterId ? null : filterId,
+          genres: null,
+          artists: null,
+        };
+        break;
+      }
+      case "genres": {
+        nextState = {
+          eras: state.eras,
+          genres: state.genres === filterId ? null : filterId,
+          artists: null,
+        };
+        break;
+      }
+      case "artists": {
+        nextState = {
+          eras: state.eras,
+          genres: state.genres,
+          artists: state.artists === filterId ? null : filterId,
+        };
+        break;
+      }
+    }
+
+    return nextState;
+  };
 
 export const CategoryFilterBody = ({
   active,
   category,
   filter,
   handleClick,
-}: CategoryFilterBodyProps) => {
+}: CategoryFilterProps) => {
   return (
     <li key={filter.id}>
       <div
-        className={`m-0 w-full py-1 pl-4 pr-0 text-left ${
-          (active ?? filter.active) && "bg-blue-500"
-        }`}
-        onClick={handleClick}
+        className={`m-0 w-full py-1 pl-4 pr-0 text-left ${(active ?? filter.active) && "bg-blue-500"
+          }`}
+        onClick={(e) => handleClick && handleClick(e, filter.id)}
       >
         <span>
           {category === ERAS ? eraEnum[filter.label as EraEnum] : filter.label}
@@ -40,54 +79,8 @@ const CategoryFilter = ({
   active,
   category,
   filter,
-  setFilter,
+  handleClick,
 }: CategoryFilterProps) => {
-  const utils = api.useUtils();
-  const postFilter = api.filter.postFilter.useMutation({
-    onSuccess: () => {
-      void utils.song.getSongs.invalidate();
-    },
-  });
-
-  const handleClick = (e: MouseEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    setFilter((state) => {
-      let nextState: Filters = state;
-      switch (category) {
-        case "eras": {
-          console.log("switch eras");
-          nextState = {
-            eras: state.eras === filter.id ? null : filter.id,
-            genres: null,
-            artists: null,
-          };
-          break;
-        }
-        case "genres": {
-          console.log("switch genres");
-          nextState = {
-            eras: state.eras,
-            genres: state.genres === filter.id ? null : filter.id,
-            artists: null,
-          };
-          break;
-        }
-        case "artists": {
-          console.log("switch artists");
-          nextState = {
-            eras: state.eras,
-            genres: state.genres,
-            artists: state.artists === filter.id ? null : filter.id,
-          };
-          break;
-        }
-      }
-
-      postFilter.mutate(nextState);
-      return nextState;
-    });
-  };
-
   return (
     <CategoryFilterBody
       active={active}
@@ -96,12 +89,6 @@ const CategoryFilter = ({
       handleClick={handleClick}
     />
   );
-};
-
-const initFilters = {
-  eras: null,
-  genres: null,
-  artists: null,
 };
 
 const getVisibleIds = (
@@ -133,28 +120,110 @@ const getVisibleIds = (
   }
 };
 
-const FilterLists = ({ filterGraph }: FilterListsProps) => {
-  const [filters, setFilter] = useState<Filters>(initFilters);
+const FilterList = ({
+  category,
+  filterGraph,
+  index,
+  filters,
+  setFilter,
+}: FilterListProps) => {
+  const [activeId, setActiveId] = useState<number | null>(null);
+  const [dir, setDir] = useState<string | null>(null);
+  const debounced = useDebouncedCallback((filterId: number) => {
+    setFilter(setFilterState(category, filterId));
+  }, 200);
 
-  return Object.entries(filterGraph).map(([category, graph]) => (
+  const filterList = getVisibleIds(category, filters, filterGraph)!;
+
+  const handleClick = (e: MouseEvent<HTMLDivElement>, filterId: number) => {
+    e.preventDefault();
+    setActiveId((currentId) => (currentId === filterId ? null : filterId));
+    setFilter(setFilterState(category, filterId));
+  };
+
+  const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+    if (event.key === "ArrowDown" || event.key === "j") {
+      setActiveId((currentId) => {
+        if (!currentId) return filterList[0]!;
+        if (currentId === filterList[filterList.length - 1]!) return currentId;
+        return filterList[filterList.indexOf(currentId) + 1]!;
+      });
+      setDir("down");
+    }
+
+    if (event.key === "ArrowUp" || event.key === "k") {
+      setActiveId((currentId) => {
+        if (!currentId) return filterList[filterList.length - 1]!;
+        if (currentId === filterList[0]!) return currentId;
+        return filterList[filterList.indexOf(currentId) - 1]!;
+      });
+      setDir("up");
+    }
+  };
+
+  useEffect(() => {
+    if (!activeId) return;
+
+    switch (dir) {
+      case "down": {
+        activeId !== filterList[filterList.length - 1] && debounced(activeId);
+      }
+      case "up": {
+        activeId !== filterList[0] && debounced(activeId);
+      }
+    }
+  }, [activeId]);
+
+  return (
     <div
-      className="h-full w-full overflow-y-scroll bg-slate-800"
-      key={category}
+      tabIndex={index + 2}
+      className="h-full w-full overflow-y-scroll border-2 border-slate-800 bg-slate-800 focus:border-2"
+      onKeyDown={handleKeyDown}
+      autoFocus={!!activeId}
     >
       <ul className="list-none p-0">
-        {getVisibleIds(category as Category, filters, filterGraph)!.map(
-          (id) => (
-            <CategoryFilter
-              key={`${category}_${id}`}
-              category={category as Category}
-              filter={graph.byId[id]!}
-              active={filters[category as Category] === id}
-              setFilter={setFilter}
-            />
-          ),
-        )}
+        {filterList.map((id) => (
+          <CategoryFilter
+            key={`${category}_${id}`}
+            category={category as Category}
+            filter={filterGraph[category].byId[id]!}
+            active={activeId === id}
+            handleClick={handleClick}
+          />
+        ))}
       </ul>
     </div>
+  );
+};
+
+const initFilters = {
+  eras: null,
+  genres: null,
+  artists: null,
+};
+
+const FilterLists = ({ filterGraph }: FilterListsProps) => {
+  const [filters, setFilter] = useState<Filters>(initFilters);
+  const utils = api.useUtils();
+  const postFilter = api.filter.postFilter.useMutation({
+    onSuccess: () => {
+      void utils.song.getSongs.invalidate();
+    },
+  });
+
+  useEffect(() => {
+    postFilter.mutate(filters);
+  }, [filters]);
+
+  return Object.keys(filterGraph).map((category, i) => (
+    <FilterList
+      key={category}
+      category={category as Category}
+      filterGraph={filterGraph}
+      index={i}
+      filters={filters}
+      setFilter={setFilter}
+    />
   ));
 };
 

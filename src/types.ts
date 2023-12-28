@@ -1,23 +1,12 @@
 import type { ERAS, GENRES, ARTISTS } from "~/constants";
 import type { RouterOutputs } from "~/trpc/shared";
-import type { Dispatch, MouseEvent, SetStateAction } from "react";
-
-export type Song = RouterOutputs["song"]["getSongs"][number];
+import { type Dispatch, type MouseEvent, type SetStateAction } from "react";
 
 export type Category = typeof ERAS | typeof GENRES | typeof ARTISTS;
 
 export type CategoryFilter = RouterOutputs["filter"]["getFilters"][number];
-
-export type FilterListProps = {
-  category: Category;
-  filters: CategoryFilter[];
-};
-
-export type CategoryFilterSharedProps = {
-  active?: boolean;
-  category: Category;
-  filter: CategoryFilter;
-};
+export type FilterGraph = RouterOutputs["filter"]["getFilterGraph"];
+export type Song = RouterOutputs["song"]["getSongs"][number];
 
 export type Filters = {
   eras: null | number;
@@ -25,14 +14,21 @@ export type Filters = {
   artists: null | number;
 };
 
-export type CategoryFilterProps = CategoryFilterSharedProps & {
-  setFilter: Dispatch<SetStateAction<Filters>>;
+type SetFilter = Dispatch<SetStateAction<Filters>>;
+
+export type FilterListProps = {
+  category: Category;
+  filters: Filters;
+  filterGraph: FilterGraph;
+  index: number;
+  setFilter: SetFilter;
 };
 
-export type CategoryFilterBodyProps = CategoryFilterSharedProps & {
-  handleClick?: (e: MouseEvent<HTMLDivElement>) => void;
+export type CategoryFilterProps = {
+  active?: boolean;
+  category: Category;
+  filter: CategoryFilter;
+  handleClick?: (e: MouseEvent<HTMLDivElement>, filterId: number) => void;
 };
-
-export type FilterGraph = RouterOutputs["filter"]["getFilterGraph"];
 
 export type FilterListsProps = { filterGraph: FilterGraph };
