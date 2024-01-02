@@ -7,6 +7,7 @@ import type {
   FilterListProps,
   FilterListsProps,
   Filters,
+  Focus,
 } from "~/types";
 import { api } from "~/trpc/react";
 import { eraEnum } from "../enums";
@@ -17,6 +18,7 @@ import {
   type KeyboardEvent,
   useState,
   useEffect,
+  useRef,
 } from "react";
 import { useDebouncedCallback } from "use-debounce";
 
@@ -61,14 +63,14 @@ export const CategoryFilterBody = ({
   handleClick,
 }: CategoryFilterProps) => {
   return (
-    <li key={filter.id}>
+    <li key={filter?.id ?? 0}>
       <div
-        className={`m-0 w-full py-1 pl-4 pr-0 text-left ${(active ?? filter.active) && "bg-blue-500"
+        className={`m-0 w-full py-1 pl-4 pr-0 text-left ${(active ?? filter?.active) && "bg-blue-500"
           }`}
-        onClick={(e) => handleClick && handleClick(e, filter.id)}
+        onClick={(e) => handleClick && handleClick(e, filter?.id ?? 0)}
       >
         <span>
-          {category === ERAS ? eraEnum[filter.label as EraEnum] : filter.label}
+          {!filter ? "All" : category === ERAS ? eraEnum[filter.label as EraEnum] : filter.label}
         </span>
       </div>
     </li>
@@ -123,28 +125,31 @@ const getVisibleIds = (
 const FilterList = ({
   category,
   filterGraph,
-  index,
   filters,
+  focus,
+  index,
   setFilter,
+  setFocus,
 }: FilterListProps) => {
-  const [activeId, setActiveId] = useState<number | null>(null);
+  const [activeId, setActiveId] = useState<number>(0);
   const [dir, setDir] = useState<string | null>(null);
-  const debounced = useDebouncedCallback((filterId: number) => {
+  const divRef = useRef<HTMLDivElement>(null);
+  const selectNextLi = useDebouncedCallback((filterId: number) => {
     setFilter(setFilterState(category, filterId));
-  }, 200);
+  }, 300);
 
   const filterList = getVisibleIds(category, filters, filterGraph)!;
 
   const handleClick = (e: MouseEvent<HTMLDivElement>, filterId: number) => {
     e.preventDefault();
-    setActiveId((currentId) => (currentId === filterId ? null : filterId));
-    setFilter(setFilterState(category, filterId));
+    setActiveId((currentId) => (currentId === filterId ? 0 : filterId));
+    filterId !== 0 && setFilter(setFilterState(category, filterId));
   };
 
   const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
     if (event.key === "ArrowDown" || event.key === "j") {
       setActiveId((currentId) => {
-        if (!currentId) return filterList[0]!;
+        if (currentId === 0) return filterList[0]!;
         if (currentId === filterList[filterList.length - 1]!) return currentId;
         return filterList[filterList.indexOf(currentId) + 1]!;
       });
@@ -153,40 +158,71 @@ const FilterList = ({
 
     if (event.key === "ArrowUp" || event.key === "k") {
       setActiveId((currentId) => {
-        if (!currentId) return filterList[filterList.length - 1]!;
-        if (currentId === filterList[0]!) return currentId;
+        if (currentId === filterList[0]!) return 0;
+        if (currentId === 0) return 0;
         return filterList[filterList.indexOf(currentId) - 1]!;
       });
       setDir("up");
     }
+
+    if (event.key === "ArrowRight" || event.key === "l") {
+      setFocus(index === 2 ? null : index + 1 as Focus);
+      setDir(null);
+    }
+
+    if (event.key === "ArrowLeft" || event.key === "h") {
+      setFocus(index === 0 ? null : index - 1 as Focus);
+      setDir(null);
+    }
   };
 
+  // Reset child filters when changing parent
   useEffect(() => {
-    if (!activeId) return;
+    if (activeId && !dir) {
+      // TODO [Cosmetic] Fix lists of one reseting to all. 
+      !filters[category] && setActiveId(0)
+    }
+  }, [activeId, dir, filters[category]]);
+
+  useEffect(() => {
+    if (focus) {
+      divRef.current?.focus();
+    }
+  }, [focus]);
+
+  useEffect(() => {
+    if (activeId === null || undefined) return;
 
     switch (dir) {
       case "down": {
-        activeId !== filterList[filterList.length - 1] && debounced(activeId);
+        activeId !== filterList[filterList.length - 1] && selectNextLi(activeId);
       }
       case "up": {
-        activeId !== filterList[0] && debounced(activeId);
+        activeId !== filterList[0] && selectNextLi(activeId);
       }
     }
   }, [activeId]);
 
+  // console.log({ category, activeId, dir });
   return (
     <div
       tabIndex={index + 2}
       className="h-full w-full overflow-y-scroll border-2 border-slate-800 bg-slate-800 focus:border-2"
       onKeyDown={handleKeyDown}
-      autoFocus={!!activeId}
+      ref={divRef}
     >
       <ul className="list-none p-0">
+        <CategoryFilter
+          key={`${category}_0`}
+          category={category as Category}
+          active={activeId === 0}
+          handleClick={handleClick}
+        />
         {filterList.map((id) => (
           <CategoryFilter
             key={`${category}_${id}`}
             category={category as Category}
-            filter={filterGraph[category].byId[id]!}
+            filter={filterGraph[category].byId[id]}
             active={activeId === id}
             handleClick={handleClick}
           />
@@ -204,6 +240,7 @@ const initFilters = {
 
 const FilterLists = ({ filterGraph }: FilterListsProps) => {
   const [filters, setFilter] = useState<Filters>(initFilters);
+  const [focus, setFocus] = useState<Focus>(null);
   const utils = api.useUtils();
   const postFilter = api.filter.postFilter.useMutation({
     onSuccess: () => {
@@ -215,14 +252,18 @@ const FilterLists = ({ filterGraph }: FilterListsProps) => {
     postFilter.mutate(filters);
   }, [filters]);
 
+  console.log(filters);
+
   return Object.keys(filterGraph).map((category, i) => (
     <FilterList
       key={category}
       category={category as Category}
       filterGraph={filterGraph}
+      focus={focus === i}
       index={i}
       filters={filters}
       setFilter={setFilter}
+      setFocus={setFocus}
     />
   ));
 };
