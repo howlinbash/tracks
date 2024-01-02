@@ -122,6 +122,8 @@ const getVisibleIds = (
   }
 };
 
+type Dir = "up" | "down" | "jumpTop" | "jumpBottom" | null;
+
 const FilterList = ({
   category,
   filterGraph,
@@ -132,8 +134,10 @@ const FilterList = ({
   setFocus,
 }: FilterListProps) => {
   const [activeId, setActiveId] = useState<number>(0);
-  const [dir, setDir] = useState<string | null>(null);
+  const [dir, setDir] = useState<Dir>(null);
+  const [gee, setGee] = useState(false);
   const divRef = useRef<HTMLDivElement>(null);
+  const ulRef = useRef<HTMLUListElement>(null);
   const selectNextLi = useDebouncedCallback((filterId: number) => {
     setFilter(setFilterState(category, filterId));
   }, 300);
@@ -174,6 +178,22 @@ const FilterList = ({
       setFocus(index === 0 ? null : index - 1 as Focus);
       setDir(null);
     }
+
+    if (event.key === "g") {
+      if (!gee) {
+        setGee(true)
+        setTimeout(() => setGee(g => g && false), 190)
+      } else {
+        setActiveId(0);
+        setDir("jumpTop");
+        setGee(false)
+      }
+    }
+
+    if (event.key === "G") {
+      setActiveId(filterList[filterList.length - 1]!);
+      setDir("jumpBottom");
+    }
   };
 
   // Reset child filters when changing parent
@@ -192,18 +212,31 @@ const FilterList = ({
 
   useEffect(() => {
     if (activeId === null || undefined) return;
+    const ul = ulRef?.current;
 
     switch (dir) {
       case "down": {
         activeId !== filterList[filterList.length - 1] && selectNextLi(activeId);
+        break;
       }
       case "up": {
         activeId !== filterList[0] && selectNextLi(activeId);
+        break;
+      }
+      case "jumpTop": {
+        selectNextLi(activeId);
+        ul && ul.scrollIntoView({ block: 'start', behavior: 'smooth' });
+        break;
+      }
+      case "jumpBottom": {
+        selectNextLi(activeId);
+        ul && ul.scrollIntoView({ block: 'end', behavior: 'smooth' });
+        break;
       }
     }
   }, [activeId]);
 
-  // console.log({ category, activeId, dir });
+  // console.log({ category, dir });
   return (
     <div
       tabIndex={index + 2}
@@ -211,7 +244,7 @@ const FilterList = ({
       onKeyDown={handleKeyDown}
       ref={divRef}
     >
-      <ul className="list-none p-0">
+      <ul className="list-none p-0" ref={ulRef}>
         <CategoryFilter
           key={`${category}_0`}
           category={category as Category}
@@ -252,7 +285,7 @@ const FilterLists = ({ filterGraph }: FilterListsProps) => {
     postFilter.mutate(filters);
   }, [filters]);
 
-  console.log(filters);
+  // console.log(filters);
 
   return Object.keys(filterGraph).map((category, i) => (
     <FilterList
