@@ -1,5 +1,5 @@
 import type { Category, FilterListsProps } from "~/types";
-import { CategoryFilterBody } from "../_components/filter-lists";
+import { CategoryFilterBody } from "./filter-lists";
 
 const FilterListsServer = ({ filterGraph }: FilterListsProps) =>
   Object.entries(filterGraph).map(([category, graph]) => (
@@ -8,7 +8,7 @@ const FilterListsServer = ({ filterGraph }: FilterListsProps) =>
         {graph.allIds.map((id) => (
           <CategoryFilterBody
             category={category as Category}
-            filter={graph.byId[id]!}
+            filter={graph.byId[id]}
           />
         ))}
       </ul>

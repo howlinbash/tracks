@@ -65,12 +65,17 @@ export const CategoryFilterBody = ({
   return (
     <li key={filter?.id ?? 0}>
       <div
-        className={`m-0 w-full py-1 pl-4 pr-0 text-left ${(active ?? filter?.active) && "bg-blue-500"
-          }`}
+        className={`m-0 w-full py-1 pl-4 pr-0 text-left ${
+          (active ?? filter?.active) && "bg-blue-500"
+        }`}
         onClick={(e) => handleClick && handleClick(e, filter?.id ?? 0)}
       >
         <span>
-          {!filter ? "All" : category === ERAS ? eraEnum[filter.label as EraEnum] : filter.label}
+          {!filter
+            ? "All"
+            : category === ERAS
+              ? eraEnum[filter.label as EraEnum]
+              : filter.label}
         </span>
       </div>
     </li>
@@ -170,23 +175,23 @@ const FilterList = ({
     }
 
     if (event.key === "ArrowRight" || event.key === "l") {
-      setFocus(index === 2 ? null : index + 1 as Focus);
+      setFocus(index === 2 ? null : ((index + 1) as Focus));
       setDir(null);
     }
 
     if (event.key === "ArrowLeft" || event.key === "h") {
-      setFocus(index === 0 ? null : index - 1 as Focus);
+      setFocus(index === 0 ? null : ((index - 1) as Focus));
       setDir(null);
     }
 
     if (event.key === "g") {
       if (!gee) {
-        setGee(true)
-        setTimeout(() => setGee(g => g && false), 190)
+        setGee(true);
+        setTimeout(() => setGee((g) => g && false), 190);
       } else {
         setActiveId(0);
         setDir("jumpTop");
-        setGee(false)
+        setGee(false);
       }
     }
 
@@ -199,8 +204,8 @@ const FilterList = ({
   // Reset child filters when changing parent
   useEffect(() => {
     if (activeId && !dir) {
-      // TODO [Cosmetic] Fix lists of one reseting to all. 
-      !filters[category] && setActiveId(0)
+      // TODO [Cosmetic] Fix lists of one reseting to all.
+      !filters[category] && setActiveId(0);
     }
   }, [activeId, dir, filters[category]]);
 
@@ -216,7 +221,8 @@ const FilterList = ({
 
     switch (dir) {
       case "down": {
-        activeId !== filterList[filterList.length - 1] && selectNextLi(activeId);
+        activeId !== filterList[filterList.length - 1] &&
+          selectNextLi(activeId);
         break;
       }
       case "up": {
@@ -225,12 +231,12 @@ const FilterList = ({
       }
       case "jumpTop": {
         selectNextLi(activeId);
-        ul && ul.scrollIntoView({ block: 'start', behavior: 'smooth' });
+        ul && ul.scrollIntoView({ block: "start", behavior: "smooth" });
         break;
       }
       case "jumpBottom": {
         selectNextLi(activeId);
-        ul && ul.scrollIntoView({ block: 'end', behavior: 'smooth' });
+        ul && ul.scrollIntoView({ block: "end", behavior: "smooth" });
         break;
       }
     }

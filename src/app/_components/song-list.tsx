@@ -41,40 +41,38 @@ const SongList = ({ items: songs }: SongListProps) => {
   });
 
   return (
-    <div className="w-full overflow-y-scroll px-4">
-      <table className="h-full w-full bg-slate-800">
-        <thead className="sticky top-0 bg-slate-800">
-          {table.getHeaderGroups().map((headerGroup) => (
-            <tr
-              className="flex w-full border-b border-stone-200 py-2 pl-6 text-left"
-              key={headerGroup.id}
-            >
-              {headerGroup.headers.map((header) => (
-                <th className="w-full" key={header.id}>
-                  {header.isPlaceholder
-                    ? null
-                    : flexRender(
-                        header.column.columnDef.header,
-                        header.getContext(),
-                      )}
-                </th>
-              ))}
-            </tr>
-          ))}
-        </thead>
-        <tbody>
-          {table.getRowModel().rows.map((row) => (
-            <tr className="flex w-full py-1 pl-6 text-left" key={row.id}>
-              {row.getVisibleCells().map((cell) => (
-                <td className="w-full" key={cell.id}>
-                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                </td>
-              ))}
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+    <table className="h-full w-full bg-slate-800">
+      <thead className="sticky top-0 bg-slate-800">
+        {table.getHeaderGroups().map((headerGroup) => (
+          <tr
+            className="flex w-full border-b border-stone-200 py-2 pl-6 text-left"
+            key={headerGroup.id}
+          >
+            {headerGroup.headers.map((header) => (
+              <th className="w-full" key={header.id}>
+                {header.isPlaceholder
+                  ? null
+                  : flexRender(
+                    header.column.columnDef.header,
+                    header.getContext(),
+                  )}
+              </th>
+            ))}
+          </tr>
+        ))}
+      </thead>
+      <tbody>
+        {table.getRowModel().rows.map((row) => (
+          <tr className="flex w-full py-1 pl-6 text-left" key={row.id}>
+            {row.getVisibleCells().map((cell) => (
+              <td className="w-full" key={cell.id}>
+                {flexRender(cell.column.columnDef.cell, cell.getContext())}
+              </td>
+            ))}
+          </tr>
+        ))}
+      </tbody>
+    </table>
   );
 };
 

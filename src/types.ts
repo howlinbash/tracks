@@ -7,6 +7,7 @@ export type Category = typeof ERAS | typeof GENRES | typeof ARTISTS;
 export type CategoryFilter = RouterOutputs["filter"]["getFilters"][number];
 export type FilterGraph = RouterOutputs["filter"]["getFilterGraph"];
 export type Song = RouterOutputs["song"]["getSongs"][number];
+export type Songs = RouterOutputs["song"]["getSongs"];
 
 export type Filters = {
   eras: null | number;

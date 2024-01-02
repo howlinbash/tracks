@@ -15,19 +15,17 @@ const SongRow = ({ song }: { song?: Song }) => (
 
 const SongListServer = ({ songs }: { songs: Song[] }) => {
   return (
-    <div className="w-full overflow-y-scroll px-4">
-      <table className="w-full h-full">
-        <thead className="sticky top-0 bg-slate-900">
-          <tr className="flex w-full py-2 pl-6 text-left">
-            <th className="w-full">Era</th>
-            <th className="w-full">Genre</th>
-            <th className="w-full">Artist</th>
-            <th className="w-full">Song</th>
-          </tr>
-        </thead>
-        <tbody>{songs?.map((song) => <SongRow song={song} />)}</tbody>
-      </table>
-    </div>
+    <table className="w-full h-full">
+      <thead className="sticky top-0 bg-slate-900">
+        <tr className="flex w-full py-2 pl-6 text-left">
+          <th className="w-full">Era</th>
+          <th className="w-full">Genre</th>
+          <th className="w-full">Artist</th>
+          <th className="w-full">Song</th>
+        </tr>
+      </thead>
+      <tbody>{songs?.map((song) => <SongRow song={song} />)}</tbody>
+    </table>
   );
 };
 
