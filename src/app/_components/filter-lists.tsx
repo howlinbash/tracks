@@ -7,7 +7,6 @@ import type {
   FilterListProps,
   FilterListsProps,
   Filters,
-  Focus,
 } from "~/types";
 import { api } from "~/trpc/react";
 import { eraEnum } from "../enums";
@@ -133,10 +132,7 @@ const FilterList = ({
   category,
   filterGraph,
   filters,
-  focus,
-  index,
   setFilter,
-  setFocus,
 }: FilterListProps) => {
   const [activeId, setActiveId] = useState<number>(0);
   const [dir, setDir] = useState<Dir>(null);
@@ -174,16 +170,6 @@ const FilterList = ({
       setDir("up");
     }
 
-    if (event.key === "ArrowRight" || event.key === "l") {
-      setFocus(index === 2 ? null : ((index + 1) as Focus));
-      setDir(null);
-    }
-
-    if (event.key === "ArrowLeft" || event.key === "h") {
-      setFocus(index === 0 ? null : ((index - 1) as Focus));
-      setDir(null);
-    }
-
     if (event.key === "g") {
       if (!gee) {
         setGee(true);
@@ -205,15 +191,10 @@ const FilterList = ({
   useEffect(() => {
     if (activeId && !dir) {
       // TODO [Cosmetic] Fix lists of one reseting to all.
+      console.log('filter clear', filters);
       !filters[category] && setActiveId(0);
     }
   }, [activeId, dir, filters[category]]);
-
-  useEffect(() => {
-    if (focus) {
-      divRef.current?.focus();
-    }
-  }, [focus]);
 
   useEffect(() => {
     if (activeId === null || undefined) return;
@@ -242,10 +223,21 @@ const FilterList = ({
     }
   }, [activeId]);
 
+  const handleBlur = () => {
+    console.log('Div blurred');
+    setDir(null);
+  };
+
+  useEffect(() => {
+    const div = divRef?.current;
+    div?.addEventListener('blur', handleBlur);
+    return () => div?.removeEventListener('blur', handleBlur);
+  }, [])
+
   // console.log({ category, dir });
   return (
     <div
-      tabIndex={index + 2}
+      tabIndex={0}
       className="h-full w-full overflow-y-scroll border-2 border-slate-800 bg-slate-800 focus:border-2"
       onKeyDown={handleKeyDown}
       ref={divRef}
@@ -279,7 +271,6 @@ const initFilters = {
 
 const FilterLists = ({ filterGraph }: FilterListsProps) => {
   const [filters, setFilter] = useState<Filters>(initFilters);
-  const [focus, setFocus] = useState<Focus>(null);
   const utils = api.useUtils();
   const postFilter = api.filter.postFilter.useMutation({
     onSuccess: () => {
@@ -293,16 +284,13 @@ const FilterLists = ({ filterGraph }: FilterListsProps) => {
 
   // console.log(filters);
 
-  return Object.keys(filterGraph).map((category, i) => (
+  return Object.keys(filterGraph).map((category) => (
     <FilterList
       key={category}
       category={category as Category}
       filterGraph={filterGraph}
-      focus={focus === i}
-      index={i}
       filters={filters}
       setFilter={setFilter}
-      setFocus={setFocus}
     />
   ));
 };

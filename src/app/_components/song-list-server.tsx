@@ -15,6 +15,9 @@ const SongRow = ({ song }: { song?: Song }) => (
 
 const SongListServer = ({ songs }: { songs: Song[] }) => {
   return (
+    <div
+      className="ml-4 w-[calc(100%-32px)] overflow-y-scroll border-2 border-slate-900" 
+    >
     <table className="w-full h-full">
       <thead className="sticky top-0 bg-slate-900">
         <tr className="flex w-full py-2 pl-6 text-left">
@@ -26,6 +29,7 @@ const SongListServer = ({ songs }: { songs: Song[] }) => {
       </thead>
       <tbody>{songs?.map((song) => <SongRow song={song} />)}</tbody>
     </table>
+    </div>
   );
 };
 
