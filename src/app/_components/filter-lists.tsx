@@ -8,7 +8,7 @@ import type {
   FilterListsProps,
   Filters,
   ElemPos,
-  Dir,
+  ListEvent,
 } from "~/types";
 import { api } from "~/trpc/react";
 import { eraEnum } from "../enums";
@@ -25,46 +25,24 @@ import {
 } from "react";
 import { useDebouncedCallback } from "use-debounce";
 
-const setFilterState =
-  (category: Category, filterId: number) => (state: Filters) => {
-    let nextState = state;
-
-    switch (category) {
-      case "eras": {
-        nextState = {
-          eras: state.eras === filterId ? null : filterId,
-          genres: null,
-          artists: null,
-        };
-        break;
-      }
-      case "genres": {
-        nextState = {
-          eras: state.eras,
-          genres: state.genres === filterId ? null : filterId,
-          artists: null,
-        };
-        break;
-      }
-      case "artists": {
-        nextState = {
-          eras: state.eras,
-          genres: state.genres,
-          artists: state.artists === filterId ? null : filterId,
-        };
-        break;
-      }
-    }
-
-    return nextState;
-  };
+/*
+ *  From the FilterList component any listEvent (click, keyboard triggered
+ *  cursor movement), will trigger an update to the activeLi (which is just the
+ *  filterList array index).
+ *
+ *  There is a useEffect listening for activeLi updates if its a legitimate
+ *  event it will trigger the setFilters debouncer (selectNextLi).
+ *
+ *  The setFilters debouncer triggers the mutation in the FilterLists parent
+ */
 
 const CategoryFilterLi = ({
   active,
   category,
-  dir,
+  listEvent,
   filter,
   handleClick,
+  index,
   listContainerPos,
 }: FilterLiProps) => {
   const liRef = useRef<HTMLLIElement>(null);
@@ -72,32 +50,29 @@ const CategoryFilterLi = ({
   // Keep li in shot as you scroll into overflow
   useEffect(() => {
     if (active) {
-      if (dir === "down") {
+      if (listEvent === "down") {
         const li = liRef?.current;
         if (li && listContainerPos[0]) {
-          // console.log({ offsetTop: li.offsetTop, offsetHeight: li.offsetHeight, clientHeight: listContainerPos[0], dOffsetTop: listContainerPos[1], scrollTop: listContainerPos[2] });
           const overflowedBelow = (li.offsetTop + li.offsetHeight - listContainerPos[1]!) > listContainerPos[0];
           overflowedBelow && li.scrollIntoView({ block: "end" });
         }
       }
-      if (dir === "up") {
+      if (listEvent === "up") {
         const li = liRef?.current;
         if (li && listContainerPos[0]) {
-          // console.log({ offsetTop: li.offsetTop, offsetHeight: li.offsetHeight, clientHeight: listContainerPos[0], dOffsetTop: listContainerPos[1], scrollTop: listContainerPos[2] });
           const overflowedAbove = li.offsetTop < (listContainerPos[1]! + listContainerPos[2]!);
           overflowedAbove && li.scrollIntoView({ block: "start" });
         }
       }
     }
-  }, [active, dir]);
+  }, [active, listEvent]);
 
   return (
     <li key={filter?.id ?? 0} ref={liRef}>
       <div
-        className={`m-0 w-full py-1 pl-4 pr-0 text-left ${
-          (active ?? filter?.active) && "bg-blue-500"
-        }`}
-        onClick={(e) => handleClick(e, filter?.id ?? 0)}
+        className={`m-0 w-full py-1 pl-4 pr-0 text-left ${(active ?? filter?.active) && "bg-blue-500"
+          }`}
+        onClick={(e) => handleClick(e, index)}
       >
         <span>
           {!filter
@@ -140,49 +115,90 @@ const getVisibleIds = (
   }
 };
 
+const setFiltersState =
+  (category: Category, filterId: number | null) => (state: Filters) => {
+    let nextState = state;
+
+    switch (category) {
+      case "eras": {
+        nextState = {
+          eras: state.eras === filterId ? null : filterId,
+          genres: null,
+          artists: null,
+        };
+        break;
+      }
+      case "genres": {
+        nextState = {
+          eras: state.eras,
+          genres: state.genres === filterId ? null : filterId,
+          artists: null,
+        };
+        break;
+      }
+      case "artists": {
+        nextState = {
+          eras: state.eras,
+          genres: state.genres,
+          artists: state.artists === filterId ? null : filterId,
+        };
+        break;
+      }
+    }
+
+    return nextState;
+  };
+
 const FilterList = memo(function FilterList({
   category,
   filterGraph,
   filters,
-  setFilter,
+  setFilters,
 }: FilterListProps) {
-  const [activeId, setActiveId] = useState<number>(0);
-  const [dir, setDir] = useState<Dir>(null);
+  const [activeLi, setActiveLi] = useState<number | null>(null);
+  const [listEvent, setListEvent] = useState<ListEvent>(null);
   const [gee, setGee] = useState(false);
   const divRef = useRef<HTMLDivElement>(null);
   const ulRef = useRef<HTMLUListElement>(null);
   const dRc = divRef?.current
-  const divPos = useMemo<ElemPos<number|undefined>>(() => [dRc?.clientHeight, dRc?.offsetTop, dRc?.scrollTop], [dRc?.clientHeight, dRc?.offsetTop, dRc?.scrollTop]);
-          
-  const selectNextLi = useDebouncedCallback((filterId: number) => {
-    setFilter(setFilterState(category, filterId));
+  const divPos = useMemo<ElemPos<number | undefined>>(() => [dRc?.clientHeight, dRc?.offsetTop, dRc?.scrollTop], [dRc?.clientHeight, dRc?.offsetTop, dRc?.scrollTop]);
+
+  const selectNextLi = useDebouncedCallback((index: number | null) => {
+    setFilters(setFiltersState(category, index === null ? null : filterList[index]!));
   }, 300);
 
   const filterList = getVisibleIds(category, filters, filterGraph)!;
 
-  const handleClick = (e: MouseEvent<HTMLDivElement>, filterId: number) => {
+  const handleClick = (e: MouseEvent<HTMLDivElement>, index: number | undefined) => {
     e.preventDefault();
-    setActiveId((currentId) => (currentId === filterId ? 0 : filterId));
-    filterId !== 0 && setFilter(setFilterState(category, filterId));
+    setListEvent("click");
+    if (index === undefined) {
+      if (activeLi === null) return; // ignore redundant clicks on 'all' li
+
+      // legitimate toggle to 'all' li (no filter)
+      setActiveLi(null);
+      return;
+    }
+    setActiveLi((currentIndex) => (currentIndex === index ? null : index));
   };
 
   const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
     if (event.key === "ArrowDown" || event.key === "j") {
-      setActiveId((currentId) => {
-        if (currentId === 0) return filterList[0]!;
-        if (currentId === filterList[filterList.length - 1]!) return currentId;
-        return filterList[filterList.indexOf(currentId) + 1]!;
+      setActiveLi((currentLi) => {
+        if (currentLi === null) return 0;
+        if (currentLi === filterList.length - 1) return currentLi;
+        return currentLi + 1;
       });
-      setDir("down");
+      setListEvent("down");
     }
 
     if (event.key === "ArrowUp" || event.key === "k") {
-      setActiveId((currentId) => {
-        if (currentId === filterList[0]!) return 0;
-        if (currentId === 0) return 0;
-        return filterList[filterList.indexOf(currentId) - 1]!;
+      setActiveLi((currentLi) => {
+        if (currentLi === null) return currentLi;
+        if (currentLi === 0) return null;
+        return currentLi - 1;
       });
-      setDir("up");
+      setListEvent("up");
     }
 
     if (event.key === "g") {
@@ -190,66 +206,44 @@ const FilterList = memo(function FilterList({
         setGee(true);
         setTimeout(() => setGee((g) => g && false), 190);
       } else {
-        setActiveId(0);
-        setDir("jumpTop");
+        setActiveLi(null);
+        setListEvent("jumpTop");
         setGee(false);
       }
     }
 
     if (event.key === "G") {
-      setActiveId(filterList[filterList.length - 1]!);
-      setDir("jumpBottom");
+      setActiveLi(filterList.length - 1);
+      setListEvent("jumpBottom");
     }
   };
 
-  // Reset child filters when changing parent
+  // listen for activeLi updates and update filtersState/mutate accordingly
   useEffect(() => {
-    if (activeId && !dir) {
-      // TODO [Cosmetic] Fix lists of one reseting to all.
-      // console.log('filter clear', filters);
-      console.log('reset child when changing parent');
-      !filters[category] && setActiveId(0);
-    }
-  }, [activeId, dir, filters[category]]);
-
-  useEffect(() => {
-    console.log('select next li');
-    if (activeId === null || undefined) return;
     const ul = ulRef?.current;
 
-    switch (dir) {
-      case "down": {
-        activeId !== filterList[filterList.length - 1] &&
-          selectNextLi(activeId);
-        break;
-      }
-      case "up": {
-        activeId !== filterList[0] && selectNextLi(activeId);
-        break;
-      }
-      case "jumpTop": {
-        selectNextLi(activeId);
-        ul && ul.scrollIntoView({ block: "start", behavior: "smooth" });
-        break;
-      }
-      case "jumpBottom": {
-        selectNextLi(activeId);
-        ul && ul.scrollIntoView({ block: "end", behavior: "smooth" });
-        break;
-      }
+    listEvent && selectNextLi(activeLi);
+    if (listEvent === "jumpTop" || listEvent === "jumpBottom") {
+      ul && ul.scrollIntoView({ block: listEvent === "jumpTop" ? "start" : "end", behavior: "smooth" });
     }
-  }, [activeId]);
+  }, [activeLi, listEvent]);
 
+  // Reset child filters when changing parent
   useEffect(() => {
-    console.log('handleBlur');
-    const handleBlur = () => setDir(null);
+    if (activeLi !== null && !listEvent) {
+      // TODO [Cosmetic] Fix lists of one reseting to all.
+      !filters[category] && setActiveLi(null);
+    }
+  }, [activeLi, listEvent, filters[category]]);
+
+  // Prepare to reset child filters when changing parent
+  useEffect(() => {
+    const handleBlur = () => setListEvent(null);
     const div = divRef?.current;
     div?.addEventListener('blur', handleBlur);
     return () => div?.removeEventListener('blur', handleBlur);
   }, [])
 
-  // category === 'genres' && console.log('scrollTop', divRef?.current?.scrollTop);
-  console.log(category, dir, gee, activeId, filters);
   return (
     <div
       tabIndex={0}
@@ -261,20 +255,21 @@ const FilterList = memo(function FilterList({
         <CategoryFilterLi
           key={`${category}_0`}
           category={category as Category}
-          active={activeId === 0}
+          active={activeLi === null}
           handleClick={handleClick}
           listContainerPos={divPos}
-          dir={dir}
+          listEvent={listEvent}
         />
-        {filterList.map((id) => (
+        {filterList.map((id, i) => (
           <CategoryFilterLi
             key={`${category}_${id}`}
             category={category as Category}
             filter={filterGraph[category].byId[id]}
-            active={activeId === id}
+            active={activeLi === i}
             handleClick={handleClick}
             listContainerPos={divPos}
-            dir={dir}
+            listEvent={listEvent}
+            index={i}
           />
         ))}
       </ul>
@@ -289,30 +284,26 @@ const initFilters = {
 };
 
 const FilterLists = ({ filterGraph }: FilterListsProps) => {
-  const [filters, setFilter] = useState<Filters>(initFilters);
+  const [filters, setFilters] = useState<Filters>(initFilters);
   const utils = api.useUtils();
   const postFilter = api.filter.postFilter.useMutation({
-    onMutate: () => console.log('mutate'),
-    onSettled: () => console.log('settled'),
     onSuccess: () => {
-      console.log('success');
       void utils.song.getSongs.invalidate();
     },
   });
 
   useEffect(() => {
-    console.log('useEffect');
+    console.log(filters);
     postFilter.mutate(filters);
   }, [filters]);
 
-  console.log('filterlists');
   return CategoryMap.map((category) => (
     <FilterList
       key={category}
       category={category as Category}
       filterGraph={filterGraph}
       filters={filters}
-      setFilter={setFilter}
+      setFilters={setFilters}
     />
   ));
 };

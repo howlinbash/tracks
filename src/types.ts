@@ -15,31 +15,41 @@ export type Filters = {
   artists: null | number;
 };
 
-export type Dir = "up" | "down" | "jumpTop" | "jumpBottom" | null;
+export type ListEvent =
+  | "click"
+  | "up"
+  | "down"
+  | "jumpTop"
+  | "jumpBottom"
+  | null;
 
-type SetFilter = Dispatch<SetStateAction<Filters>>;
+type SetFilters = Dispatch<SetStateAction<Filters>>;
 
 export type FilterListProps = {
   category: Category;
   filters: Filters;
   filterGraph: FilterGraph;
-  setFilter: SetFilter;
+  setFilters: SetFilters;
 };
 
 export type FilterLiServerProps = {
   category: Category;
   filter?: CategoryFilter;
-}
+};
 
 export type ElemPos<T extends number | undefined> = [T, T, T];
 
 export type FilterLiProps = FilterLiServerProps & {
   active: boolean;
-  dir: Dir
-  handleClick: (e: MouseEvent<HTMLDivElement>, filterId: number) => void;
-  listContainerPos: ElemPos<number | undefined>
+  listEvent: ListEvent;
+  handleClick: (
+    e: MouseEvent<HTMLDivElement>,
+    filterId: number | undefined,
+  ) => void;
+  index?: number;
+  listContainerPos: ElemPos<number | undefined>;
 };
 
 export type FilterListsProps = {
-  filterGraph: FilterGraph
+  filterGraph: FilterGraph;
 };

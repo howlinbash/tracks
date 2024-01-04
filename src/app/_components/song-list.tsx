@@ -78,8 +78,6 @@ const SongList = ({ songs }: SongListProps) => {
     }
   };
 
-  // TODO: Fix bug at top of filterlist
-  // TODO: remove cursor if selection is filtered off screen (blur is still selected when i leave britpop!
   // TODO: Make song length elipss...
   // TODO: Add windowing
 
@@ -101,9 +99,9 @@ const SongList = ({ songs }: SongListProps) => {
                   {header.isPlaceholder
                     ? null
                     : flexRender(
-                        header.column.columnDef.header,
-                        header.getContext(),
-                      )}
+                      header.column.columnDef.header,
+                      header.getContext(),
+                    )}
                 </th>
               ))}
             </tr>

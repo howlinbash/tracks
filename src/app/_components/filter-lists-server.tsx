@@ -3,10 +3,7 @@ import { eraEnum } from "../enums";
 import { ERAS } from "~/constants";
 import { type EraEnum } from "@prisma/client";
 
-const FilterLi = ({
-  category,
-  filter,
-}: FilterLiServerProps) => {
+const FilterLi = ({ category, filter }: FilterLiServerProps) => {
   return (
     <li key={filter?.id ?? 0}>
       <div className="m-0 w-full py-1 pl-4 pr-0 text-left">
@@ -27,10 +24,7 @@ const FilterListsServer = ({ filterGraph }: FilterListsProps) =>
     <div className="h-full w-full overflow-y-scroll">
       <ul className="list-none p-0">
         {graph.allIds.map((id) => (
-          <FilterLi
-            category={category as Category}
-            filter={graph.byId[id]}
-          />
+          <FilterLi category={category as Category} filter={graph.byId[id]} />
         ))}
       </ul>
     </div>

@@ -11,7 +11,7 @@ type SwitcherProps = {
 const SongListLoader = ({ children }: SwitcherProps) => {
   const { data, isLoading } = api.song.getSongs.useQuery();
 
-  return isLoading ? children : <SongList songs={data!} />;
+  return isLoading ? children : <SongList songs={data} />;
 };
 
 export default SongListLoader;
