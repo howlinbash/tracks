@@ -1,7 +1,8 @@
 import { api } from "~/trpc/server";
 import SongListServer from "./_components/song-list-server";
 import FilterListsServer from "./_components/filter-lists-server";
-import UiSwitcher from "./_components/ui-switcher";
+import FilterListLoader from "./_components/filter-list-loader";
+import SongListLoader from "./_components/song-list-loader";
 
 export default async function Home() {
   const songs = await api.song.getSongs.query();
@@ -14,10 +15,12 @@ export default async function Home() {
         <span className="justify-self-center"></span>
         <div />
       </div>
-      <UiSwitcher
-        ServerFilterLists={<FilterListsServer filterGraph={filterGraph} />}
-        ServerSongList={<SongListServer songs={songs} />}
-      />
+      <FilterListLoader>
+        <FilterListsServer filterGraph={filterGraph} />
+      </FilterListLoader>
+      <SongListLoader>
+        <SongListServer songs={songs} />
+      </SongListLoader>
     </main>
   );
 }

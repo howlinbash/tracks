@@ -7,8 +7,9 @@ import {
   createColumnHelper,
   flexRender,
   getCoreRowModel,
-  useReactTable,
+  useReactTable, type Row
 } from "@tanstack/react-table";
+import { type KeyboardEvent, useState } from "react";
 
 const columnHelper = createColumnHelper<Song>();
 
@@ -31,18 +32,61 @@ const columns = [
   }),
 ];
 
-export type SongListProps = { items?: Song[] };
+type TableRowProps<T> = { row: Row<T>, active: boolean };
 
-const SongList = ({ items: songs }: SongListProps) => {
+const TableRow = <T,>({ row, active }: TableRowProps<T>) => {
+  return (
+    <tr className={`flex w-full py-1 pl-6 text-left ${active && "bg-blue-500"}`}>
+      {row.getVisibleCells().map((cell) => (
+        <td className="w-full" key={cell.id}>
+          {flexRender(cell.column.columnDef.cell, cell.getContext())}
+        </td>
+      ))}
+    </tr>
+  );
+};
+
+export type SongListProps = { songs?: Song[] };
+
+const SongList = ({ songs }: SongListProps) => {
+  const [activeRow, setActiveRow] = useState<number | null>(null);
+  // const selectNextRow = useDebouncedCallback((filterId: number) => {
+  //   setFilter(setFilterState(category, filterId));
+  // }, 100);
+
   const table = useReactTable({
     data: songs!,
     columns,
     getCoreRowModel: getCoreRowModel(),
   });
 
+  const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+    if (event.key === "ArrowDown" || event.key === "j") {
+      setActiveRow((currentRow) => {
+        if (currentRow === null) return 0;
+        if (currentRow === songs!.length - 1) return currentRow;
+        return currentRow + 1;
+      });
+    }
+
+    if (event.key === "ArrowUp" || event.key === "k") {
+      setActiveRow((currentRow) => {
+        if (currentRow === null) return songs!.length - 1;
+        if (currentRow === 0) return currentRow;
+        return currentRow - 1;
+      });
+    }
+  };
+
+  // TODO: Fix bug at top of filterlist
+  // TODO: remove cursor if selection is filtered off screen (blur is still selected when i leave britpop!
+  // TODO: Make song length elipss...
+  // TODO: Add windowing
+
   return (
     <div
       className="ml-4 w-[calc(100%-32px)] overflow-y-scroll border-2 border-slate-800 bg-slate-800 focus:border-2"
+      onKeyDown={handleKeyDown}
       tabIndex={0}
     >
       <table className="h-full w-full bg-slate-800">
@@ -66,14 +110,8 @@ const SongList = ({ items: songs }: SongListProps) => {
           ))}
         </thead>
         <tbody>
-          {table.getRowModel().rows.map((row) => (
-            <tr className="flex w-full py-1 pl-6 text-left" key={row.id}>
-              {row.getVisibleCells().map((cell) => (
-                <td className="w-full" key={cell.id}>
-                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                </td>
-              ))}
-            </tr>
+          {table.getRowModel().rows.map((row, i) => (
+            <TableRow row={row} active={i === activeRow} key={row.id} />
           ))}
         </tbody>
       </table>

@@ -2,22 +2,26 @@
 
 import type {
   Category,
-  CategoryFilterProps,
+  FilterLiProps,
   FilterGraph,
   FilterListProps,
   FilterListsProps,
   Filters,
+  ElemPos,
+  Dir,
 } from "~/types";
 import { api } from "~/trpc/react";
 import { eraEnum } from "../enums";
-import { type EraEnum } from "@prisma/client";
-import { ERAS } from "~/constants";
+import type { EraEnum } from "@prisma/client";
+import { CategoryMap, ERAS } from "~/constants";
 import {
   type MouseEvent,
   type KeyboardEvent,
   useState,
   useEffect,
   useRef,
+  useMemo,
+  memo,
 } from "react";
 import { useDebouncedCallback } from "use-debounce";
 
@@ -55,19 +59,45 @@ const setFilterState =
     return nextState;
   };
 
-export const CategoryFilterBody = ({
+const CategoryFilterLi = ({
   active,
   category,
+  dir,
   filter,
   handleClick,
-}: CategoryFilterProps) => {
+  listContainerPos,
+}: FilterLiProps) => {
+  const liRef = useRef<HTMLLIElement>(null);
+
+  // Keep li in shot as you scroll into overflow
+  useEffect(() => {
+    if (active) {
+      if (dir === "down") {
+        const li = liRef?.current;
+        if (li && listContainerPos[0]) {
+          // console.log({ offsetTop: li.offsetTop, offsetHeight: li.offsetHeight, clientHeight: listContainerPos[0], dOffsetTop: listContainerPos[1], scrollTop: listContainerPos[2] });
+          const overflowedBelow = (li.offsetTop + li.offsetHeight - listContainerPos[1]!) > listContainerPos[0];
+          overflowedBelow && li.scrollIntoView({ block: "end" });
+        }
+      }
+      if (dir === "up") {
+        const li = liRef?.current;
+        if (li && listContainerPos[0]) {
+          // console.log({ offsetTop: li.offsetTop, offsetHeight: li.offsetHeight, clientHeight: listContainerPos[0], dOffsetTop: listContainerPos[1], scrollTop: listContainerPos[2] });
+          const overflowedAbove = li.offsetTop < (listContainerPos[1]! + listContainerPos[2]!);
+          overflowedAbove && li.scrollIntoView({ block: "start" });
+        }
+      }
+    }
+  }, [active, dir]);
+
   return (
-    <li key={filter?.id ?? 0}>
+    <li key={filter?.id ?? 0} ref={liRef}>
       <div
         className={`m-0 w-full py-1 pl-4 pr-0 text-left ${
           (active ?? filter?.active) && "bg-blue-500"
         }`}
-        onClick={(e) => handleClick && handleClick(e, filter?.id ?? 0)}
+        onClick={(e) => handleClick(e, filter?.id ?? 0)}
       >
         <span>
           {!filter
@@ -78,22 +108,6 @@ export const CategoryFilterBody = ({
         </span>
       </div>
     </li>
-  );
-};
-
-const CategoryFilter = ({
-  active,
-  category,
-  filter,
-  handleClick,
-}: CategoryFilterProps) => {
-  return (
-    <CategoryFilterBody
-      active={active}
-      category={category}
-      filter={filter}
-      handleClick={handleClick}
-    />
   );
 };
 
@@ -126,19 +140,20 @@ const getVisibleIds = (
   }
 };
 
-type Dir = "up" | "down" | "jumpTop" | "jumpBottom" | null;
-
-const FilterList = ({
+const FilterList = memo(function FilterList({
   category,
   filterGraph,
   filters,
   setFilter,
-}: FilterListProps) => {
+}: FilterListProps) {
   const [activeId, setActiveId] = useState<number>(0);
   const [dir, setDir] = useState<Dir>(null);
   const [gee, setGee] = useState(false);
   const divRef = useRef<HTMLDivElement>(null);
   const ulRef = useRef<HTMLUListElement>(null);
+  const dRc = divRef?.current
+  const divPos = useMemo<ElemPos<number|undefined>>(() => [dRc?.clientHeight, dRc?.offsetTop, dRc?.scrollTop], [dRc?.clientHeight, dRc?.offsetTop, dRc?.scrollTop]);
+          
   const selectNextLi = useDebouncedCallback((filterId: number) => {
     setFilter(setFilterState(category, filterId));
   }, 300);
@@ -191,12 +206,14 @@ const FilterList = ({
   useEffect(() => {
     if (activeId && !dir) {
       // TODO [Cosmetic] Fix lists of one reseting to all.
-      console.log('filter clear', filters);
+      // console.log('filter clear', filters);
+      console.log('reset child when changing parent');
       !filters[category] && setActiveId(0);
     }
   }, [activeId, dir, filters[category]]);
 
   useEffect(() => {
+    console.log('select next li');
     if (activeId === null || undefined) return;
     const ul = ulRef?.current;
 
@@ -223,18 +240,16 @@ const FilterList = ({
     }
   }, [activeId]);
 
-  const handleBlur = () => {
-    console.log('Div blurred');
-    setDir(null);
-  };
-
   useEffect(() => {
+    console.log('handleBlur');
+    const handleBlur = () => setDir(null);
     const div = divRef?.current;
     div?.addEventListener('blur', handleBlur);
     return () => div?.removeEventListener('blur', handleBlur);
   }, [])
 
-  // console.log({ category, dir });
+  // category === 'genres' && console.log('scrollTop', divRef?.current?.scrollTop);
+  console.log(category, dir, gee, activeId, filters);
   return (
     <div
       tabIndex={0}
@@ -243,25 +258,29 @@ const FilterList = ({
       ref={divRef}
     >
       <ul className="list-none p-0" ref={ulRef}>
-        <CategoryFilter
+        <CategoryFilterLi
           key={`${category}_0`}
           category={category as Category}
           active={activeId === 0}
           handleClick={handleClick}
+          listContainerPos={divPos}
+          dir={dir}
         />
         {filterList.map((id) => (
-          <CategoryFilter
+          <CategoryFilterLi
             key={`${category}_${id}`}
             category={category as Category}
             filter={filterGraph[category].byId[id]}
             active={activeId === id}
             handleClick={handleClick}
+            listContainerPos={divPos}
+            dir={dir}
           />
         ))}
       </ul>
     </div>
   );
-};
+});
 
 const initFilters = {
   eras: null,
@@ -273,18 +292,21 @@ const FilterLists = ({ filterGraph }: FilterListsProps) => {
   const [filters, setFilter] = useState<Filters>(initFilters);
   const utils = api.useUtils();
   const postFilter = api.filter.postFilter.useMutation({
+    onMutate: () => console.log('mutate'),
+    onSettled: () => console.log('settled'),
     onSuccess: () => {
+      console.log('success');
       void utils.song.getSongs.invalidate();
     },
   });
 
   useEffect(() => {
+    console.log('useEffect');
     postFilter.mutate(filters);
   }, [filters]);
 
-  // console.log(filters);
-
-  return Object.keys(filterGraph).map((category) => (
+  console.log('filterlists');
+  return CategoryMap.map((category) => (
     <FilterList
       key={category}
       category={category as Category}

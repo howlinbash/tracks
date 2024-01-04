@@ -6,3 +6,4 @@ export const CategoryIdDict = {
   [GENRES]: "genreId",
   [ARTISTS]: "artistId",
 } as const;
+export const CategoryMap = [ERAS, GENRES, ARTISTS];
