@@ -1,6 +1,7 @@
 import type { ERAS, GENRES, ARTISTS } from "~/constants";
 import type { RouterOutputs } from "~/trpc/shared";
 import type { Dispatch, MouseEvent, SetStateAction } from "react";
+import type { Row } from "@tanstack/react-table";
 
 export type Category = typeof ERAS | typeof GENRES | typeof ARTISTS;
 
@@ -37,7 +38,7 @@ export type FilterLiServerProps = {
   filter?: CategoryFilter;
 };
 
-export type ElemPos = [number, number, number] | null;
+export type ElemPos = [number, number, number, number] | null;
 
 export type FilterLiProps = FilterLiServerProps & {
   active: boolean;
@@ -47,9 +48,22 @@ export type FilterLiProps = FilterLiServerProps & {
     filterId: number | undefined,
   ) => void;
   index?: number;
-  listContainerPos: ElemPos;
+  listContainerPos: number[] | null;
 };
 
 export type FilterListsProps = {
   filterGraph: FilterGraph;
+};
+
+export type TableRowProps<T> = {
+  active: boolean;
+  containerPos: ElemPos;
+  index: number;
+  handleClick: (
+    e: MouseEvent<HTMLTableRowElement>,
+    i: number,
+  ) => void;
+  listEvent: ListEvent;
+  row: Row<T>;
+  scrollCorrect: () => void;
 };

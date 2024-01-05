@@ -7,7 +7,6 @@ import type {
   FilterListProps,
   FilterListsProps,
   Filters,
-  ElemPos,
   ListEvent,
 } from "~/types";
 import { api } from "~/trpc/react";
@@ -24,6 +23,7 @@ import {
   memo,
 } from "react";
 import { useDebouncedCallback } from "use-debounce";
+import { page } from "../_utils";
 
 /*
  *  From the FilterList component any listEvent (click, keyboard triggered
@@ -50,17 +50,16 @@ const CategoryFilterLi = ({
   // Keep li in shot as you scroll into overflow
   useEffect(() => {
     if (active) {
+      const li = liRef?.current;
       if (listEvent === "down") {
-        const li = liRef?.current;
         if (li && listContainerPos) {
-          const overflowedBelow = (li.offsetTop + li.offsetHeight - listContainerPos[1]) > listContainerPos[0];
+          const overflowedBelow = (li.offsetTop + li.offsetHeight - listContainerPos[1]!) > listContainerPos[0]!;
           overflowedBelow && li.scrollIntoView({ block: "end" });
         }
       }
       if (listEvent === "up") {
-        const li = liRef?.current;
         if (li && listContainerPos) {
-          const overflowedAbove = li.offsetTop < (listContainerPos[1] + listContainerPos[2]);
+          const overflowedAbove = li.offsetTop < (listContainerPos[1]! + listContainerPos[2]!);
           overflowedAbove && li.scrollIntoView({ block: "start" });
         }
       }
@@ -85,13 +84,6 @@ const CategoryFilterLi = ({
     </li>
   );
 };
-
-const page = (div: HTMLDivElement, dir: 0 | 1) => {
-  div.scrollBy({
-    top: dir ? div.clientHeight : -div.clientHeight,
-    behavior: 'smooth'
-  });
-}
 
 const getVisibleIds = (
   category: Category,
@@ -167,10 +159,10 @@ const FilterList = memo(function FilterList({
   const [gee, setGee] = useState(false);
   const divRef = useRef<HTMLDivElement>(null);
   const ulRef = useRef<HTMLUListElement>(null);
-  const containerPos = useMemo<ElemPos>(() => {
-    const dRc = divRef?.current
+  const dRc = divRef?.current
+  const containerPos = useMemo<number[] | null>(() => {
     return !dRc ? null : [dRc.clientHeight, dRc.offsetTop, dRc.scrollTop];
-  }, [divRef.current]);
+  }, [dRc, dRc?.clientHeight, dRc?.offsetTop, dRc?.scrollTop]);
 
   const selectNextLi = useDebouncedCallback((index: number | null) => {
     setFilters(setFiltersState(category, index === null ? null : filterList[index]!));
@@ -178,6 +170,7 @@ const FilterList = memo(function FilterList({
 
   const filterList = getVisibleIds(category, filters, filterGraph)!;
 
+  // TODO: this function shouldn't need to be debounced
   const handleClick = (e: MouseEvent<HTMLDivElement>, index: number | undefined) => {
     e.preventDefault();
     setListEvent("click");
