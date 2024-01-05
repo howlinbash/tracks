@@ -52,15 +52,15 @@ const CategoryFilterLi = ({
     if (active) {
       if (listEvent === "down") {
         const li = liRef?.current;
-        if (li && listContainerPos[0]) {
-          const overflowedBelow = (li.offsetTop + li.offsetHeight - listContainerPos[1]!) > listContainerPos[0];
+        if (li && listContainerPos) {
+          const overflowedBelow = (li.offsetTop + li.offsetHeight - listContainerPos[1]) > listContainerPos[0];
           overflowedBelow && li.scrollIntoView({ block: "end" });
         }
       }
       if (listEvent === "up") {
         const li = liRef?.current;
-        if (li && listContainerPos[0]) {
-          const overflowedAbove = li.offsetTop < (listContainerPos[1]! + listContainerPos[2]!);
+        if (li && listContainerPos) {
+          const overflowedAbove = li.offsetTop < (listContainerPos[1] + listContainerPos[2]);
           overflowedAbove && li.scrollIntoView({ block: "start" });
         }
       }
@@ -85,6 +85,13 @@ const CategoryFilterLi = ({
     </li>
   );
 };
+
+const page = (div: HTMLDivElement, dir: 0 | 1) => {
+  div.scrollBy({
+    top: dir ? div.clientHeight : -div.clientHeight,
+    behavior: 'smooth'
+  });
+}
 
 const getVisibleIds = (
   category: Category,
@@ -160,8 +167,10 @@ const FilterList = memo(function FilterList({
   const [gee, setGee] = useState(false);
   const divRef = useRef<HTMLDivElement>(null);
   const ulRef = useRef<HTMLUListElement>(null);
-  const dRc = divRef?.current
-  const divPos = useMemo<ElemPos<number | undefined>>(() => [dRc?.clientHeight, dRc?.offsetTop, dRc?.scrollTop], [dRc?.clientHeight, dRc?.offsetTop, dRc?.scrollTop]);
+  const containerPos = useMemo<ElemPos>(() => {
+    const dRc = divRef?.current
+    return !dRc ? null : [dRc.clientHeight, dRc.offsetTop, dRc.scrollTop];
+  }, [divRef.current]);
 
   const selectNextLi = useDebouncedCallback((index: number | null) => {
     setFilters(setFiltersState(category, index === null ? null : filterList[index]!));
@@ -216,6 +225,14 @@ const FilterList = memo(function FilterList({
       setActiveLi(filterList.length - 1);
       setListEvent("jumpBottom");
     }
+
+    if (event.key === "PageDown" || event.key === "d") {
+      divRef.current && page(divRef.current, 1);
+    }
+
+    if (event.key === "PageUp" || event.key === "u") {
+      divRef.current && page(divRef.current, 0);
+    }
   };
 
   // listen for activeLi updates and update filtersState/mutate accordingly
@@ -257,7 +274,7 @@ const FilterList = memo(function FilterList({
           category={category as Category}
           active={activeLi === null}
           handleClick={handleClick}
-          listContainerPos={divPos}
+          listContainerPos={containerPos}
           listEvent={listEvent}
         />
         {filterList.map((id, i) => (
@@ -267,7 +284,7 @@ const FilterList = memo(function FilterList({
             filter={filterGraph[category].byId[id]}
             active={activeLi === i}
             handleClick={handleClick}
-            listContainerPos={divPos}
+            listContainerPos={containerPos}
             listEvent={listEvent}
             index={i}
           />
@@ -293,7 +310,6 @@ const FilterLists = ({ filterGraph }: FilterListsProps) => {
   });
 
   useEffect(() => {
-    console.log(filters);
     postFilter.mutate(filters);
   }, [filters]);
 

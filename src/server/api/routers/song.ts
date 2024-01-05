@@ -50,7 +50,7 @@ export const songRouter = createTRPCRouter({
       },
     });
 
-    return songs.map((song) => ({
+    return songs.slice(0,100).map((song) => ({
       id: song.id,
       song: song.label,
       path: song.path,

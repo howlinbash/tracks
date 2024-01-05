@@ -1,6 +1,6 @@
 import type { ERAS, GENRES, ARTISTS } from "~/constants";
 import type { RouterOutputs } from "~/trpc/shared";
-import { type Dispatch, type MouseEvent, type SetStateAction } from "react";
+import type { Dispatch, MouseEvent, SetStateAction } from "react";
 
 export type Category = typeof ERAS | typeof GENRES | typeof ARTISTS;
 
@@ -37,7 +37,7 @@ export type FilterLiServerProps = {
   filter?: CategoryFilter;
 };
 
-export type ElemPos<T extends number | undefined> = [T, T, T];
+export type ElemPos = [number, number, number] | null;
 
 export type FilterLiProps = FilterLiServerProps & {
   active: boolean;
@@ -47,7 +47,7 @@ export type FilterLiProps = FilterLiServerProps & {
     filterId: number | undefined,
   ) => void;
   index?: number;
-  listContainerPos: ElemPos<number | undefined>;
+  listContainerPos: ElemPos;
 };
 
 export type FilterListsProps = {
