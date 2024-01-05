@@ -36,9 +36,9 @@ type TableRowProps<T> = { row: Row<T>, active: boolean };
 
 const TableRow = <T,>({ row, active }: TableRowProps<T>) => {
   return (
-    <tr className={`flex w-full py-1 pl-6 text-left ${active && "bg-blue-500"}`}>
-      {row.getVisibleCells().map((cell) => (
-        <td className="w-full" key={cell.id}>
+    <tr className={`grid w-full grid-cols-[auto_3fr_4fr_5fr] py-1 pl-6 text-left ${active && "bg-blue-500"}`}>
+      {row.getVisibleCells().map((cell, i) => (
+        <td className={`${i === 0 ? "w-16" : ""} text-ellipsis whitespace-nowrap overflow-hidden`} key={cell.id}>
           {flexRender(cell.column.columnDef.cell, cell.getContext())}
         </td>
       ))}
@@ -78,9 +78,7 @@ const SongList = ({ songs }: SongListProps) => {
     }
   };
 
-  // TODO: Make song length elipss...
   // TODO: Add windowing
-
   return (
     <div
       className="ml-4 w-[calc(100%-32px)] overflow-y-scroll border-2 border-slate-800 bg-slate-800 focus:border-2"
@@ -91,11 +89,11 @@ const SongList = ({ songs }: SongListProps) => {
         <thead className="sticky top-0 bg-slate-800">
           {table.getHeaderGroups().map((headerGroup) => (
             <tr
-              className="flex w-full border-b border-stone-200 py-2 pl-6 text-left"
+              className="grid w-full grid-cols-[auto_3fr_4fr_5fr] border-b border-stone-200 py-2 pl-6 text-left"
               key={headerGroup.id}
             >
-              {headerGroup.headers.map((header) => (
-                <th className="w-full" key={header.id}>
+              {headerGroup.headers.map((header, i) => (
+                <th className={i === 0 ? "w-16" : ""} key={header.id}>
                   {header.isPlaceholder
                     ? null
                     : flexRender(
