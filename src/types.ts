@@ -38,7 +38,7 @@ export type FilterLiServerProps = {
   filter?: CategoryFilter;
 };
 
-export type ElemPos = [number, number, number, number] | null;
+export type ElemPos = [number, number, number] | null;
 
 export type FilterLiProps = FilterLiServerProps & {
   active: boolean;
@@ -48,7 +48,7 @@ export type FilterLiProps = FilterLiServerProps & {
     filterId: number | undefined,
   ) => void;
   index?: number;
-  listContainerPos: number[] | null;
+  listContainerPos: ElemPos;
 };
 
 export type FilterListsProps = {
@@ -57,7 +57,7 @@ export type FilterListsProps = {
 
 export type TableRowProps<T> = {
   active: boolean;
-  containerPos: ElemPos;
+  bodyAtts: ElemPos;
   index: number;
   handleClick: (
     e: MouseEvent<HTMLTableRowElement>,
@@ -65,5 +65,4 @@ export type TableRowProps<T> = {
   ) => void;
   listEvent: ListEvent;
   row: Row<T>;
-  scrollCorrect: () => void;
 };

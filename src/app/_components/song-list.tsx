@@ -43,12 +43,11 @@ const columns = [
 
 const TableRow = <T,>({
   active,
-  containerPos,
+  bodyAtts,
   handleClick,
   index,
   listEvent,
   row,
-  scrollCorrect,
 }: TableRowProps<T>) => {
   const rowRef = useRef<HTMLTableRowElement>(null);
 
@@ -57,21 +56,15 @@ const TableRow = <T,>({
     if (active) {
       const rRef = rowRef?.current;
       if (listEvent === "down") {
-        if (rRef && containerPos) {
-          const overflowedBelow =
-            rRef.offsetTop >
-            containerPos[2] + containerPos[0] - containerPos[3];
+        if (rRef && bodyAtts) {
+          const overflowedBelow = rRef.offsetTop > bodyAtts[0] + bodyAtts[2];
           overflowedBelow && rRef.scrollIntoView({ block: "end" });
         }
       }
       if (listEvent === "up") {
-        if (rRef && containerPos) {
-          const overflowedAbove =
-            rRef.offsetTop < containerPos[3] + containerPos[2];
-          if (overflowedAbove) {
-            rRef.scrollIntoView({ block: "start" });
-            scrollCorrect();
-          }
+        if (rRef && bodyAtts) {
+          const overflowedAbove = rRef.offsetTop < bodyAtts[1] + bodyAtts[2];
+          overflowedAbove && rRef.scrollIntoView({ block: "start" });
         }
       }
     }
@@ -79,17 +72,15 @@ const TableRow = <T,>({
 
   return (
     <tr
-      className={`grid w-full grid-cols-[auto_3fr_4fr_5fr] py-1 pl-6 text-left ${
-        active && "bg-blue-500"
-      }`}
+      className={`grid w-full grid-cols-[auto_3fr_4fr_5fr] py-1 pl-6 text-left ${active && "bg-blue-500"
+        }`}
       onClick={(e) => handleClick(e, index)}
       ref={rowRef}
     >
       {row.getVisibleCells().map((cell, i) => (
         <td
-          className={`${
-            i === 0 ? "w-16" : ""
-          } overflow-hidden text-ellipsis whitespace-nowrap`}
+          className={`${i === 0 ? "w-16" : ""
+            } overflow-hidden text-ellipsis whitespace-nowrap`}
           key={cell.id}
         >
           {flexRender(cell.column.columnDef.cell, cell.getContext())}
@@ -105,23 +96,11 @@ const SongList = ({ songs }: SongListProps) => {
   const [activeRow, setActiveRow] = useState<number | null>(null);
   const [listEvent, setListEvent] = useState<ListEvent>(null);
   const [gee, setGee] = useState(false);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const headRef = useRef<HTMLTableSectionElement>(null);
   const bodyRef = useRef<HTMLTableSectionElement>(null);
-  const cRc = containerRef?.current;
-  const hRc = headRef?.current;
-  const containerPos = useMemo<ElemPos>(() => {
-    return !cRc
-      ? null
-      : [cRc.clientHeight, cRc.offsetTop, cRc.scrollTop, hRc!.clientHeight];
-  }, [
-    cRc,
-    hRc,
-    cRc?.clientHeight,
-    cRc?.offsetTop,
-    cRc?.scrollTop,
-    hRc?.clientHeight,
-  ]);
+  const bRc = bodyRef?.current;
+  const bodyAtts = useMemo<ElemPos>(() => {
+    return !bRc ? null : [bRc.clientHeight, bRc.offsetTop, bRc.scrollTop];
+  }, [bRc, bRc?.clientHeight, bRc?.offsetTop, bRc?.scrollTop]);
 
   const table = useReactTable({
     data: songs!,
@@ -137,7 +116,6 @@ const SongList = ({ songs }: SongListProps) => {
 
   const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
     const bRc = bodyRef.current;
-    const cRc = containerRef.current;
 
     if (event.key === "ArrowDown" || event.key === "j") {
       setActiveRow((currentRow) => {
@@ -164,41 +142,32 @@ const SongList = ({ songs }: SongListProps) => {
       } else {
         setActiveRow(0);
         setGee(false);
-        if (bRc) {
-          bRc.scrollTo({ top: 0, behavior: "smooth" });
-          scrollCorrect();
-        }
+        bRc && bRc.scrollTo({ top: 0, behavior: "smooth" });
       }
     }
 
     if (event.key === "G") {
       songs && setActiveRow(songs.length - 1);
-      cRc && cRc.scrollIntoView({ block: "end", behavior: "smooth" });
+      bRc && bRc.scrollIntoView({ block: "end", behavior: "smooth" });
     }
 
     if (event.key === "PageDown" || event.key === "d") {
-      cRc && page(cRc, 1);
+      bRc && page(bRc, 1);
     }
 
     if (event.key === "PageUp" || event.key === "u") {
-      cRc && page(cRc, 0);
+      bRc && page(bRc, 0);
     }
-  };
-
-  const scrollCorrect = () => {
-    if (!hRc || !cRc) return;
-    cRc.scrollBy({ top: -hRc.clientHeight });
   };
 
   return (
     <div
-      className="ml-4 w-[calc(100%-32px)] overflow-y-scroll border-2 border-slate-800 bg-slate-800 focus:border-2"
+      className="relative ml-4 max-h-full w-[calc(100%-32px)] border-2 border-slate-800 bg-slate-800 focus:border-2"
       onKeyDown={handleKeyDown}
       tabIndex={0}
-      ref={containerRef}
     >
-      <table className="h-full w-full bg-slate-800">
-        <thead className="sticky top-0 bg-slate-800" ref={headRef}>
+      <table className="absolute flex h-full w-full flex-col bg-slate-800">
+        <thead className="top-0 bg-slate-800">
           {table.getHeaderGroups().map((headerGroup) => (
             <tr
               className="grid w-full grid-cols-[auto_3fr_4fr_5fr] border-b border-stone-200 py-2 pl-6 text-left"
@@ -209,25 +178,24 @@ const SongList = ({ songs }: SongListProps) => {
                   {header.isPlaceholder
                     ? null
                     : flexRender(
-                        header.column.columnDef.header,
-                        header.getContext(),
-                      )}
+                      header.column.columnDef.header,
+                      header.getContext(),
+                    )}
                 </th>
               ))}
             </tr>
           ))}
         </thead>
-        <tbody ref={bodyRef}>
+        <tbody ref={bodyRef} className={`w-full flex-1 overflow-y-scroll`}>
           {table.getRowModel().rows.map((row, i) => (
             <TableRow
               active={i === activeRow}
-              containerPos={containerPos}
+              bodyAtts={bodyAtts}
               handleClick={handleClick}
               index={i}
               key={row.id}
               listEvent={listEvent}
               row={row}
-              scrollCorrect={scrollCorrect}
             />
           ))}
         </tbody>
