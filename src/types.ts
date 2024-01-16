@@ -2,6 +2,7 @@ import type { ERAS, GENRES, ARTISTS } from "~/constants";
 import type { RouterOutputs } from "~/trpc/shared";
 import type { Dispatch, MouseEvent, SetStateAction } from "react";
 import type { Row } from "@tanstack/react-table";
+import type { Range, VirtualItem } from "@tanstack/react-virtual";
 
 export type Category = typeof ERAS | typeof GENRES | typeof ARTISTS;
 
@@ -55,14 +56,34 @@ export type FilterListsProps = {
   filterGraph: FilterGraph;
 };
 
-export type TableRowProps<T> = {
+type CommonTableRowProps<T> = {
   active: boolean;
-  bodyAtts: ElemPos;
-  index: number;
   handleClick: (
     e: MouseEvent<HTMLTableRowElement>,
     i: number,
   ) => void;
-  listEvent: ListEvent;
+  index: number;
+  listEvent: ListEvent
   row: Row<T>;
+}
+
+export type TableRowProps<T> = CommonTableRowProps<T> & {
+  bodyAtts: ElemPos;
 };
+
+export type VirtualTableRowProps<T> = CommonTableRowProps<T> & {
+  range: Range | null;
+  vRow: VirtualItem;
+};
+
+export type InnerTableRowProps<T> = { row: Row<T> };
+
+export type SongListProps = { songs?: Song[] };
+
+type ScrollAlignment = 'start' | 'center' | 'end' | 'auto';
+type ScrollBehavior = 'auto' | 'smooth';
+interface ScrollToOptions {
+    align?: ScrollAlignment;
+    behavior?: ScrollBehavior;
+}
+export type ScrollToIndex = (index: number, options?: ScrollToOptions) => void;
