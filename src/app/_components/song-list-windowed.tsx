@@ -1,10 +1,7 @@
 "use client";
 
 import type { SongListProps } from "~/types";
-import {
-  useCallback,
-  useRef,
-} from "react";
+import { useCallback, useRef } from "react";
 import {
   type Range,
   type VirtualizerOptions,
@@ -12,7 +9,12 @@ import {
   elementScroll,
   useVirtualizer,
 } from "@tanstack/react-virtual";
-import { Table, VirtualTableRow, useKeyBindings, useSongTable } from "./song-list-utils";
+import {
+  Table,
+  VirtualTableRow,
+  useKeyBindings,
+  useSongTable,
+} from "./song-list-utils";
 
 function easeInOutQuint(t: number) {
   const easeIn = 10;
@@ -22,35 +24,37 @@ function easeInOutQuint(t: number) {
 
 const WindowedSongList = ({ songs }: SongListProps) => {
   const bodyRef = useRef<HTMLTableSectionElement>(null);
-  const scrollingRef = useRef<number>()
+  const scrollingRef = useRef<number>();
   const rangeRef = useRef<Range | null>(null);
   const table = useSongTable(songs);
   const { rows } = table.getRowModel();
 
-  const scrollToFn: VirtualizerOptions<HTMLTableSectionElement, HTMLElement>['scrollToFn'] =
-    useCallback((offset, canSmooth, instance) => {
-      if (!bodyRef.current) return;
-      const duration = 1000
-      const start = bodyRef.current.scrollTop
-      const startTime = (scrollingRef.current = Date.now())
+  const scrollToFn: VirtualizerOptions<
+    HTMLTableSectionElement,
+    HTMLElement
+  >["scrollToFn"] = useCallback((offset, canSmooth, instance) => {
+    if (!bodyRef.current) return;
+    const duration = 1000;
+    const start = bodyRef.current.scrollTop;
+    const startTime = (scrollingRef.current = Date.now());
 
-      const run = () => {
-        if (scrollingRef.current !== startTime) return
-        const now = Date.now()
-        const elapsed = now - startTime
-        const progress = easeInOutQuint(Math.min(elapsed / duration, 1))
-        const interpolated = start + (offset - start) * progress
+    const run = () => {
+      if (scrollingRef.current !== startTime) return;
+      const now = Date.now();
+      const elapsed = now - startTime;
+      const progress = easeInOutQuint(Math.min(elapsed / duration, 1));
+      const interpolated = start + (offset - start) * progress;
 
-        if (elapsed < duration) {
-          elementScroll(interpolated, canSmooth, instance)
-          requestAnimationFrame(run)
-        } else {
-          elementScroll(interpolated, canSmooth, instance)
-        }
+      if (elapsed < duration) {
+        elementScroll(interpolated, canSmooth, instance);
+        requestAnimationFrame(run);
+      } else {
+        elementScroll(interpolated, canSmooth, instance);
       }
+    };
 
-      requestAnimationFrame(run)
-    }, [])
+    requestAnimationFrame(run);
+  }, []);
 
   const rowVirtualizer = useVirtualizer({
     count: rows.length,
@@ -62,14 +66,21 @@ const WindowedSongList = ({ songs }: SongListProps) => {
       rangeRef.current = range;
 
       return defaultRangeExtractor(range);
-    }, [])
+    }, []),
   });
 
-  const { activeRow, handleClick, handleKeyDown, listEvent } = useKeyBindings(songs, rowVirtualizer.scrollToIndex);
+  const { activeRow, handleClick, handleKeyDown, listEvent } = useKeyBindings(
+    songs,
+    bodyRef,
+    rowVirtualizer.scrollToIndex,
+  );
 
   return (
     <Table bodyRef={bodyRef} handleKeyDown={handleKeyDown} table={table}>
-      <div className="relative" style={{ height: `${rowVirtualizer.getTotalSize()}px` }}>
+      <div
+        className="relative"
+        style={{ height: `${rowVirtualizer.getTotalSize()}px` }}
+      >
         {rowVirtualizer.getVirtualItems().map((virtualRow, i) => (
           <VirtualTableRow
             active={virtualRow.index === activeRow}

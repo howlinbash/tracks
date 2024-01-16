@@ -1,11 +1,12 @@
 "use client";
 
 import type { ElemPos, SongListProps } from "~/types";
-import { useMemo } from "react";
+import { useMemo, useRef } from "react";
 import { Table, TableRow, useKeyBindings, useSongTable } from "./song-list-utils";
 
 const SongList = ({ songs }: SongListProps) => {
-  const { activeRow, bodyRef, handleClick, handleKeyDown, listEvent } = useKeyBindings(songs, undefined);
+  const bodyRef = useRef<HTMLTableSectionElement>(null);
+  const { activeRow, handleClick, handleKeyDown, listEvent } = useKeyBindings(songs, bodyRef, undefined);
   const table = useSongTable(songs);
   const bRc = bodyRef?.current;
   const bodyAtts = useMemo<ElemPos>(() => {

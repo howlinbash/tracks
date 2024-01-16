@@ -95,10 +95,10 @@ To duplicate this, replace the howlinbash images in the commands and dockerfile
 with your own.
 ```sh
 # Build the base container
-docker build -t howlinbash/base -f base.Dockerfile .
+docker build -t howlinbash/tracks-base -f base.Dockerfile .
 
 # Build the app container
-docker build -t howlinbash/app -f app.Dockerfile .
+docker build -t howlinbash/tracks-app -f app.Dockerfile .
 
 # Stage the containers
 docker compose -f docker-compose.stage.yml up

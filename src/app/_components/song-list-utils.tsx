@@ -19,12 +19,11 @@ import {
 } from "react";
 import { page } from "../_utils";
 
-const InnerTableRow = <T,>({ row }: InnerTableRowProps<T>) => 
+const InnerTableRow = <T,>({ row }: InnerTableRowProps<T>) =>
   row.getVisibleCells().map((cell, i) => (
     <td
-      className={`${
-        i === 0 ? "w-16" : ""
-      } overflow-hidden text-ellipsis whitespace-nowrap`}
+      className={`${i === 0 ? "w-16" : ""
+        } overflow-hidden text-ellipsis whitespace-nowrap`}
       key={cell.id}
     >
       {flexRender(cell.column.columnDef.cell, cell.getContext())}
@@ -180,11 +179,14 @@ export const useSongTable = (songs: Song[] | undefined) => {
   return table;
 }
 
-export const useKeyBindings = (songs: Song[] | undefined, scrollToIndex: ScrollToIndex | undefined) => {
+export const useKeyBindings = (
+  songs: Song[] | undefined,
+  bodyRef: RefObject<HTMLTableSectionElement> | undefined,
+  scrollToIndex: ScrollToIndex | undefined
+) => {
   const [activeRow, setActiveRow] = useState<number | null>(null);
   const [gee, setGee] = useState(false);
   const [listEvent, setListEvent] = useState<ListEvent>(null);
-  const bodyRef = useRef<HTMLTableSectionElement>(null);
 
   const handleClick = (e: MouseEvent<HTMLTableRowElement>, index: number) => {
     e.preventDefault();
@@ -192,7 +194,7 @@ export const useKeyBindings = (songs: Song[] | undefined, scrollToIndex: ScrollT
   };
 
   const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
-    const bRc = bodyRef.current;
+    const bRc = bodyRef?.current;
 
     if (event.key === "ArrowDown" || event.key === "j") {
       setActiveRow((currentRow) => {
@@ -211,17 +213,17 @@ export const useKeyBindings = (songs: Song[] | undefined, scrollToIndex: ScrollT
       setListEvent("up");
     }
 
-    if (event.key === "G") {
+    if (event.key === "G" || event.key === "End") {
       songs && setActiveRow(songs.length - 1);
       if (scrollToIndex) {
-        songs && scrollToIndex(songs.length -1);
+        songs && scrollToIndex(songs.length - 1);
       } else {
         bRc && bRc.scrollIntoView({ block: "end", behavior: "smooth" });
       }
     }
 
-    if (event.key === "g") {
-      if (!gee) {
+    if (event.key === "g" || event.key === "Home") {
+      if (!gee && event.key === "g") {
         setGee(true);
         setTimeout(() => setGee((g) => g && false), 190);
       } else {
