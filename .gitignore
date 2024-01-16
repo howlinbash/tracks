@@ -46,3 +46,4 @@ Session.vim
 
 # run scripts
 scripts/load-db.js
+db

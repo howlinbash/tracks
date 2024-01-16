@@ -1,0 +1,41 @@
+version: '2'
+services:
+  db:
+    image: postgres
+    restart: always
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    ports:
+      - 5432:5432
+    volumes:
+      - tracks-db-data:/var/lib/postgresql/data
+  app:
+    image: howlinbash/tracks-app
+    depends_on:
+      - db
+      - migrator
+    environment:
+      - DATABASE_URL=${DATABASE_URL}
+    ports:
+      - 3000:3000
+  migrator:
+    image: howlinbash/tracks-base
+    depends_on:
+      - db
+    environment:
+      - DATABASE_URL=${DATABASE_URL}
+    command: ["npm", "run", "db:push"]
+  studio:
+    image: howlinbash/tracks-base
+    ports:
+      - 5555:5555
+    depends_on:
+      - db
+      - migrator
+    environment:
+      - DATABASE_URL=${DATABASE_URL}
+    command: ["npm", "run", "db:studio"]
+volumes:
+  tracks-db-data:

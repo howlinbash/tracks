@@ -5,9 +5,9 @@
 await import("./src/env.js");
 
 /** @type {import("next").NextConfig} */
-// const config = {
+const config = {
 //   reactStrictMode: true,
-//   output: "standalone",
+  output: "standalone",
  
 //   /**
 //    * If you are using `appDir` then you must comment the below `i18n` config out.
@@ -18,8 +18,6 @@ await import("./src/env.js");
 //     locales: ["en"],
 //     defaultLocale: "en",
 //   },
-// };
-
-const config = {};
+};
 
 export default config;

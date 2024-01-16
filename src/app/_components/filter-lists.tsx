@@ -8,6 +8,7 @@ import type {
   FilterListsProps,
   Filters,
   ListEvent,
+  ElemPos,
 } from "~/types";
 import { api } from "~/trpc/react";
 import { eraEnum } from "../enums";
@@ -160,7 +161,7 @@ const FilterList = memo(function FilterList({
   const divRef = useRef<HTMLDivElement>(null);
   const ulRef = useRef<HTMLUListElement>(null);
   const dRc = divRef?.current
-  const containerPos = useMemo<number[] | null>(() => {
+  const containerPos = useMemo<ElemPos>(() => {
     return !dRc ? null : [dRc.clientHeight, dRc.offsetTop, dRc.scrollTop];
   }, [dRc, dRc?.clientHeight, dRc?.offsetTop, dRc?.scrollTop]);
 
@@ -270,7 +271,7 @@ const FilterList = memo(function FilterList({
           listContainerPos={containerPos}
           listEvent={listEvent}
         />
-        {filterList.map((id, i) => (
+        {filterList.map((id: number, i: number) => (
           <CategoryFilterLi
             key={`${category}_${id}`}
             category={category as Category}
