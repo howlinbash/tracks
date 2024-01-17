@@ -15,7 +15,6 @@ import {
   useKeyBindings,
   useSongTable,
 } from "./song-list-utils";
-import Prompt from "./prompt";
 
 function easeInOutQuint(t: number) {
   const easeIn = 10;
@@ -85,7 +84,7 @@ const WindowedSongList = ({ songs }: SongListProps) => {
       handleKeyDown={handleKeyDown}
       isPrompting={isPrompting}
       setIsPrompting={setIsPrompting}
-      song={activeRow ? songs![activeRow] : undefined}
+      song={activeRow !== null ? songs![activeRow] : undefined}
       table={table}
     >
       <div

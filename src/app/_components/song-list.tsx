@@ -31,7 +31,7 @@ const SongList = ({ songs }: SongListProps) => {
       handleKeyDown={handleKeyDown}
       isPrompting={isPrompting}
       setIsPrompting={setIsPrompting}
-      song={activeRow ? songs![activeRow] : undefined}
+      song={activeRow !== null ? songs![activeRow] : undefined}
       table={table}
     >
       {table.getRowModel().rows.map((row, i) => (
