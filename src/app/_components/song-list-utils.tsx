@@ -284,6 +284,7 @@ export const useKeyBindings = (
       setIsPrompting(p => !p);
     }
 
+
     if (event.key === "Escape") {
       setIsPrompting(false);
     }
