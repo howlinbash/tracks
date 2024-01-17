@@ -1,6 +1,13 @@
 import { eraEnum } from "../enums";
 import { type EraEnum } from "@prisma/client";
-import type { InnerTableRowProps, ListEvent, Song, TableRowProps, VirtualTableRowProps, ScrollToIndex } from "~/types";
+import type {
+  InnerTableRowProps,
+  ListEvent,
+  Song,
+  TableRowProps,
+  VirtualTableRowProps,
+  ScrollToIndex,
+} from "~/types";
 import {
   type Table as TansStackTable,
   createColumnHelper,
@@ -18,6 +25,7 @@ import {
   useEffect,
 } from "react";
 import { page } from "../_utils";
+import Prompt from "./prompt";
 
 const InnerTableRow = <T,>({ row }: InnerTableRowProps<T>) =>
   row.getVisibleCells().map((cell, i) => (
@@ -71,7 +79,15 @@ export const TableRow = <T,>({
   );
 };
 
-export const VirtualTableRow = <T,>({ active, handleClick, index, listEvent, range, row, vRow }: VirtualTableRowProps<T>) => {
+export const VirtualTableRow = <T,>({
+  active,
+  handleClick,
+  index,
+  listEvent,
+  range,
+  row,
+  vRow,
+}: VirtualTableRowProps<T>) => {
   const rowRef = useRef<HTMLTableRowElement>(null);
 
   // Keep row in shot as you scroll into overflow
@@ -95,7 +111,8 @@ export const VirtualTableRow = <T,>({ active, handleClick, index, listEvent, ran
 
   return (
     <tr
-      className={`absolute left-0 top-0 grid w-full grid-cols-[auto_3fr_4fr_5fr] py-1 pl-6 text-left h-[${vRow.size}px]  ${active && "bg-blue-500"}`}
+      className={`absolute left-0 top-0 grid w-full grid-cols-[auto_3fr_4fr_5fr] py-1 pl-6 text-left h-[${vRow.size
+        }px]  ${active && "bg-blue-500"}`}
       key={index}
       onClick={(e) => handleClick(e, index)}
       ref={rowRef}
@@ -110,41 +127,57 @@ type TableProps<T> = {
   bodyRef: RefObject<HTMLTableSectionElement>;
   children: ReactNode;
   handleKeyDown: (event: KeyboardEvent<HTMLDivElement>) => void;
+  isPrompting: boolean;
+  setIsPrompting: (is: boolean) => void;
+  song: Song | undefined;
   table: TansStackTable<T>;
-}
+};
 
-export const Table = <T,>({ bodyRef, children, handleKeyDown, table }: TableProps<T>) => {
+export const Table = <T,>({
+  bodyRef,
+  children,
+  handleKeyDown,
+  isPrompting,
+  setIsPrompting,
+  song,
+  table,
+}: TableProps<T>) => {
   return (
-    <div
-      className="relative ml-4 max-h-full w-[calc(100%-32px)] border-2 border-slate-800 bg-slate-800 focus:border-2"
-      onKeyDown={handleKeyDown}
-      tabIndex={0}
-    >
-      <table className="absolute flex h-full w-full flex-col bg-slate-800">
-        <thead className="top-0 bg-slate-800">
-          {table.getHeaderGroups().map((headerGroup) => (
-            <tr
-              className="grid w-full grid-cols-[auto_3fr_4fr_5fr] border-b border-stone-200 py-2 pl-6 text-left"
-              key={headerGroup.id}
-            >
-              {headerGroup.headers.map((header, i) => (
-                <th className={i === 0 ? "w-16" : ""} key={header.id}>
-                  {header.isPlaceholder
-                    ? null
-                    : flexRender(
-                      header.column.columnDef.header,
-                      header.getContext(),
-                    )}
-                </th>
-              ))}
-            </tr>
-          ))}
-        </thead>
-        <tbody ref={bodyRef} className={`w-full flex-1 overflow-y-scroll`}>
-          {children}
-        </tbody>
-      </table>
-    </div>
+    <>
+      <div
+        className="relative ml-4 max-h-full w-[calc(100%-32px)] border-2 border-slate-800 bg-slate-800 focus:border-2"
+        onKeyDown={handleKeyDown}
+        tabIndex={0}
+      >
+        <table className="absolute flex h-full w-full flex-col bg-slate-800">
+          <thead className="top-0 bg-slate-800">
+            {table.getHeaderGroups().map((headerGroup) => (
+              <tr
+                className="grid w-full grid-cols-[auto_3fr_4fr_5fr] border-b border-stone-200 py-2 pl-6 text-left"
+                key={headerGroup.id}
+              >
+                {headerGroup.headers.map((header, i) => (
+                  <th className={i === 0 ? "w-16" : ""} key={header.id}>
+                    {header.isPlaceholder
+                      ? null
+                      : flexRender(
+                        header.column.columnDef.header,
+                        header.getContext(),
+                      )}
+                  </th>
+                ))}
+              </tr>
+            ))}
+          </thead>
+          <tbody ref={bodyRef} className={`w-full flex-1 overflow-y-scroll`}>
+            {children}
+          </tbody>
+        </table>
+      </div>
+      {isPrompting && song ? (
+        <Prompt setIsPrompting={setIsPrompting} song={song} />
+      ) : null}
+    </>
   );
 };
 
@@ -177,20 +210,22 @@ export const useSongTable = (songs: Song[] | undefined) => {
   });
 
   return table;
-}
+};
 
 export const useKeyBindings = (
   songs: Song[] | undefined,
   bodyRef: RefObject<HTMLTableSectionElement> | undefined,
-  scrollToIndex: ScrollToIndex | undefined
+  scrollToIndex: ScrollToIndex | undefined,
 ) => {
   const [activeRow, setActiveRow] = useState<number | null>(null);
+  const [isPrompting, setIsPrompting] = useState(false);
   const [gee, setGee] = useState(false);
   const [listEvent, setListEvent] = useState<ListEvent>(null);
 
   const handleClick = (e: MouseEvent<HTMLTableRowElement>, index: number) => {
     e.preventDefault();
     setActiveRow((currentIndex) => (currentIndex === index ? null : index));
+    setIsPrompting(true);
   };
 
   const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
@@ -244,7 +279,23 @@ export const useKeyBindings = (
     if (event.key === "PageUp" || event.key === "u") {
       bRc && page(bRc, 0);
     }
+
+    if (event.key === "Enter") {
+      setIsPrompting(p => !p);
+    }
+
+    if (event.key === "Escape") {
+      setIsPrompting(false);
+    }
   };
 
-  return { activeRow, bodyRef, handleClick, handleKeyDown, listEvent };
-}
+  return {
+    activeRow,
+    bodyRef,
+    handleClick,
+    handleKeyDown,
+    isPrompting,
+    listEvent,
+    setIsPrompting,
+  };
+};

@@ -24,6 +24,14 @@ h2 {
   @apply text-3xl;
 }
 
+h3 {
+  @apply text-2xl;
+}
+
+h4 {
+  @apply text-xl;
+}
+
 main {
   @apply w-full h-full overflow-x-hidden;
 }

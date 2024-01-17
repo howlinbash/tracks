@@ -15,6 +15,7 @@ import {
   useKeyBindings,
   useSongTable,
 } from "./song-list-utils";
+import Prompt from "./prompt";
 
 function easeInOutQuint(t: number) {
   const easeIn = 10;
@@ -69,14 +70,24 @@ const WindowedSongList = ({ songs }: SongListProps) => {
     }, []),
   });
 
-  const { activeRow, handleClick, handleKeyDown, listEvent } = useKeyBindings(
-    songs,
-    bodyRef,
-    rowVirtualizer.scrollToIndex,
-  );
+  const {
+    activeRow,
+    handleClick,
+    handleKeyDown,
+    isPrompting,
+    listEvent,
+    setIsPrompting,
+  } = useKeyBindings(songs, bodyRef, rowVirtualizer.scrollToIndex);
 
   return (
-    <Table bodyRef={bodyRef} handleKeyDown={handleKeyDown} table={table}>
+    <Table
+      bodyRef={bodyRef}
+      handleKeyDown={handleKeyDown}
+      isPrompting={isPrompting}
+      setIsPrompting={setIsPrompting}
+      song={activeRow ? songs![activeRow] : undefined}
+      table={table}
+    >
       <div
         className="relative"
         style={{ height: `${rowVirtualizer.getTotalSize()}px` }}
