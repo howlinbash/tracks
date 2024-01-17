@@ -3,6 +3,7 @@ import SongListServer from "./_components/song-list-server";
 import FilterListsServer from "./_components/filter-lists-server";
 import FilterListLoader from "./_components/filter-list-loader";
 import SongListLoader from "./_components/song-list-loader";
+import SongCount from "./_components/song-count";
 
 export default async function Home() {
   const songs = await api.song.getSongs.query();
@@ -12,7 +13,7 @@ export default async function Home() {
     <main className="grid h-screen w-full grid-rows-[auto_1fr_1fr] gap-4 py-4">
       <div className="grid w-full grid-cols-[1fr_1fr_1fr] items-center">
         <h2 className="pl-5">Howlin Tracks</h2>
-        <span className="justify-self-center"></span>
+        <SongCount />
         <div />
       </div>
       <FilterListLoader>
