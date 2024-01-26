@@ -34,6 +34,7 @@ model Song {
   artist   Artist   @relation(fields: [artistId], references: [id])
   active   Boolean?
   ktv      Boolean?
+  tubes    Tube[]
 
   @@unique([label, artistId])
   @@map("songs")
@@ -73,4 +74,15 @@ model Filter {
   artistId Int?
 
   @@map("filters")
+}
+
+model Tube {
+  id      Int    @id @default(autoincrement())
+  url     String
+  library String
+  songId  Int
+  song    Song   @relation(fields: [songId], references: [id])
+
+  @@unique([url])
+  @@map("tubes")
 }
