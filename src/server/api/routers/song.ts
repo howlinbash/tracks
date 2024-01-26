@@ -63,6 +63,7 @@ export const songRouter = createTRPCRouter({
         era: song.era.label,
         genre: song.genre.label,
         artist: song.artist.label,
+        tubes: song.tubes ?? [],
       }));
     }
 
@@ -75,6 +76,7 @@ export const songRouter = createTRPCRouter({
         era: song.era.label,
         genre: song.genre.label,
         artist: song.artist.label,
+        tubes: song.tubes ?? [],
       }));
   }),
 });

@@ -11,7 +11,6 @@ const Lightbox = ({ children, onClose, twClasses }: LightBoxProps) => {
   const handleClick = (e: MouseEvent<HTMLTableRowElement>) => {
     e.preventDefault();
     e.stopPropagation();
-    onClose();
   };
 
   return (
@@ -19,9 +18,11 @@ const Lightbox = ({ children, onClose, twClasses }: LightBoxProps) => {
       <div className="absolute top-0 z-10 h-full w-full bg-black opacity-50" />
       <div
         className="absolute top-0 z-20 flex h-full w-full items-center justify-center"
-        onClick={handleClick}
+        onClick={() => onClose()}
       >
-        <div className={twClasses}>{children}</div>
+        <div onClick={handleClick} className={twClasses}>
+          {children}
+        </div>
       </div>
     </>
   );
@@ -33,11 +34,18 @@ type PromptProps = {
 };
 
 const Prompt = ({ setIsPrompting, song }: PromptProps) => {
+  const handleClick = () => {
+    setIsPrompting(false);
+    if (song.tubes) {
+      const url = song.tubes[0]?.url;
+      window.open(url, "_blank");
+    }
+  };
+
   return (
     <Lightbox twClasses="h-52 w-96" onClose={() => setIsPrompting(false)}>
       <div className="grid h-full w-full grid-cols-2 grid-rows-3 rounded-lg bg-gray-200">
         <div className="col-span-2 row-span-2 flex flex-col items-center justify-center border-b-2 border-gray-300 text-gray-800">
-          <p className="py-2">Sorry, I've not built this feature yet!</p>
           <h4 className="pb-2">{song.song}</h4>
           <p>{song.artist}</p>
         </div>
@@ -49,7 +57,7 @@ const Prompt = ({ setIsPrompting, song }: PromptProps) => {
         </button>
         <button
           className="col-span-1 flex flex-col items-center justify-center font-semibold text-blue-700"
-          onClick={() => setIsPrompting(false)}
+          onClick={handleClick}
         >
           Request
         </button>
