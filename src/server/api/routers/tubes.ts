@@ -5,7 +5,7 @@ export const tubesRouter = createTRPCRouter({
   postTubes: publicProcedure
     .input(z.boolean())
     .mutation(async ({ ctx, input }) => {
-      console.log({ input });
+      // console.log({ input });
       await ctx.db.tubes.update({
         where: {
           id: 1,

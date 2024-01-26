@@ -9,12 +9,12 @@ const Tubes = () => {
   const utils = api.useUtils();
 
   const handleClick = () => {
-    console.log("clicky", tubes);
     setTubes((tubes) => !tubes);
   };
 
   const postTubes = api.tubes.postTubes.useMutation({
     onSuccess: () => {
+      void utils.filter.getFilterGraph.invalidate();
       void utils.song.getSongs.invalidate();
     },
   });

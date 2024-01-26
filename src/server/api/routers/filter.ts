@@ -109,10 +109,54 @@ export const filterRouter = createTRPCRouter({
       eras: {},
       genres: {},
     };
-    const songs = await ctx.db.song.findMany({});
-    const eras = await ctx.db.era.findMany({});
-    const genres = await ctx.db.genre.findMany({});
-    const artists = await ctx.db.artist.findMany({});
+    const bongs = await ctx.db.song.findMany({
+      select: {
+        id: true,
+        label: true,
+        path: true,
+        eraId: true,
+        genreId: true,
+        artistId: true,
+        active: true,
+        tubes: true,
+      },
+    });
+
+    const tubes = await ctx.db.tubes.findFirst({
+      select: { tubes: true },
+    });
+
+    const tubeSelector = {
+      where: {
+        songs: {
+          some: {
+            tubes: {
+              some: {},
+            },
+          },
+        },
+      },
+    };
+    const eras = !tubes?.tubes
+      ? await ctx.db.era.findMany({})
+      : await ctx.db.era.findMany(tubeSelector);
+    const genres = !tubes?.tubes
+      ? await ctx.db.genre.findMany({})
+      : await ctx.db.genre.findMany(tubeSelector);
+    const artists = !tubes?.tubes
+      ? await ctx.db.artist.findMany({})
+      : await ctx.db.artist.findMany(tubeSelector);
+
+    const songs = !tubes?.tubes
+      ? bongs
+      : bongs.filter((song) => song.tubes.length > 0);
+
+    console.log({
+      tubes: tubes?.tubes,
+      eras: eras.length,
+      genres: genres.length,
+      artists: artists.length,
+    });
 
     eras.forEach((era) => {
       filterGraph.eras.allIds.push(era.id);
@@ -158,7 +202,7 @@ export const filterRouter = createTRPCRouter({
     Object.entries(filterSets.genres).forEach(([genreId, graph]) => {
       Object.entries(graph).forEach(([artistKey, set]) => {
         filterGraph.genres.byId[genreId]!.artists[artistKey] = Array.from(
-          set,
+          set
         ).sort((a, b) => a - b);
       });
     });
@@ -192,7 +236,7 @@ export const filterRouter = createTRPCRouter({
           const eras = await ctx.db.era.findMany({});
           if (filters?.eraId) {
             const activeFilter = eras.find(
-              (filter) => filters.eraId === filter.id,
+              (filter) => filters.eraId === filter.id
             );
             if (activeFilter) {
               activeFilter.active = true;
@@ -206,15 +250,15 @@ export const filterRouter = createTRPCRouter({
               songs: {
                 some: whereSongs.eraId
                   ? {
-                    eraId: whereSongs.eraId,
-                  }
+                      eraId: whereSongs.eraId,
+                    }
                   : {},
               },
             },
           });
           if (filters?.genreId) {
             const activeFilter = genres.find(
-              (filter) => filters.genreId === filter.id,
+              (filter) => filters.genreId === filter.id
             );
             if (activeFilter) {
               activeFilter.active = true;
@@ -232,7 +276,7 @@ export const filterRouter = createTRPCRouter({
           });
           if (filters?.artistId) {
             const activeFilter = artists.find(
-              (filter) => filters.artistId === filter.id,
+              (filter) => filters.artistId === filter.id
             );
             if (activeFilter) {
               activeFilter.active = true;
@@ -249,7 +293,7 @@ export const filterRouter = createTRPCRouter({
         eras: z.union([z.number(), z.null()]),
         genres: z.union([z.number(), z.null()]),
         artists: z.union([z.number(), z.null()]),
-      }),
+      })
     )
     .mutation(
       async ({ ctx, input }) =>
@@ -262,6 +306,6 @@ export const filterRouter = createTRPCRouter({
             genreId: input.genres,
             artistId: input.artists,
           },
-        }),
+        })
     ),
 });

@@ -93,4 +93,3 @@ model Tubes {
 
   @@map("Tubies")
 }
-
