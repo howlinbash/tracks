@@ -4,6 +4,7 @@ import FilterListsServer from "./_components/filter-lists-server";
 import FilterListLoader from "./_components/filter-list-loader";
 import SongListLoader from "./_components/song-list-loader";
 import SongCount from "./_components/song-count";
+import Tubes from "./_components/tubes";
 
 export default async function Home() {
   const songs = await api.song.getSongs.query();
@@ -14,7 +15,7 @@ export default async function Home() {
       <div className="grid w-full grid-cols-[1fr_1fr_1fr] items-center">
         <h2 className="pl-5">Howlin Tracks</h2>
         <SongCount />
-        <div />
+        <Tubes />
       </div>
       <FilterListLoader>
         <FilterListsServer filterGraph={filterGraph} />

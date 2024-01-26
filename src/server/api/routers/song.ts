@@ -47,16 +47,34 @@ export const songRouter = createTRPCRouter({
             label: true,
           },
         },
+        tubes: true,
       },
     });
 
-    return songs.map((song) => ({
-      id: song.id,
-      song: song.label,
-      path: song.path,
-      era: song.era.label,
-      genre: song.genre.label,
-      artist: song.artist.label,
-    }));
+    const tubes = await ctx.db.tubes.findFirst({
+      select: { tubes: true },
+    });
+
+    if (!tubes?.tubes) {
+      return songs.map((song) => ({
+        id: song.id,
+        song: song.label,
+        path: song.path,
+        era: song.era.label,
+        genre: song.genre.label,
+        artist: song.artist.label,
+      }));
+    }
+
+    return songs
+      .filter((song) => song.tubes.length > 0)
+      .map((song) => ({
+        id: song.id,
+        song: song.label,
+        path: song.path,
+        era: song.era.label,
+        genre: song.genre.label,
+        artist: song.artist.label,
+      }));
   }),
 });
