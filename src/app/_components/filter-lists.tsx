@@ -54,13 +54,16 @@ const CategoryFilterLi = ({
       const li = liRef?.current;
       if (listEvent === "down") {
         if (li && listContainerPos) {
-          const overflowedBelow = (li.offsetTop + li.offsetHeight - listContainerPos[1]!) > listContainerPos[0]!;
+          const overflowedBelow =
+            li.offsetTop + li.offsetHeight - listContainerPos[1]! >
+            listContainerPos[0]!;
           overflowedBelow && li.scrollIntoView({ block: "end" });
         }
       }
       if (listEvent === "up") {
         if (li && listContainerPos) {
-          const overflowedAbove = li.offsetTop < (listContainerPos[1]! + listContainerPos[2]!);
+          const overflowedAbove =
+            li.offsetTop < listContainerPos[1]! + listContainerPos[2]!;
           overflowedAbove && li.scrollIntoView({ block: "start" });
         }
       }
@@ -70,8 +73,9 @@ const CategoryFilterLi = ({
   return (
     <li key={filter?.id ?? 0} ref={liRef}>
       <div
-        className={`m-0 w-full py-1 pl-4 pr-0 text-left ${(active ?? filter?.active) && "bg-blue-500"
-          }`}
+        className={`m-0 w-full py-1 pl-4 pr-0 text-left ${
+          (active ?? filter?.active) && "bg-blue-500"
+        }`}
         onClick={(e) => handleClick(e, index)}
       >
         <span>
@@ -89,7 +93,7 @@ const CategoryFilterLi = ({
 const getVisibleIds = (
   category: Category,
   filters: Filters,
-  filterGraph: FilterGraph,
+  filterGraph: FilterGraph
 ) => {
   switch (category) {
     case "eras":
@@ -160,19 +164,24 @@ const FilterList = memo(function FilterList({
   const [gee, setGee] = useState(false);
   const divRef = useRef<HTMLDivElement>(null);
   const ulRef = useRef<HTMLUListElement>(null);
-  const dRc = divRef?.current
+  const dRc = divRef?.current;
   const containerPos = useMemo<ElemPos>(() => {
     return !dRc ? null : [dRc.clientHeight, dRc.offsetTop, dRc.scrollTop];
   }, [dRc, dRc?.clientHeight, dRc?.offsetTop, dRc?.scrollTop]);
 
   const selectNextLi = useDebouncedCallback((index: number | null) => {
-    setFilters(setFiltersState(category, index === null ? null : filterList[index]!));
+    setFilters(
+      setFiltersState(category, index === null ? null : filterList[index]!)
+    );
   }, 300);
 
   const filterList = getVisibleIds(category, filters, filterGraph)!;
 
   // TODO: this function shouldn't need to be debounced
-  const handleClick = (e: MouseEvent<HTMLDivElement>, index: number | undefined) => {
+  const handleClick = (
+    e: MouseEvent<HTMLDivElement>,
+    index: number | undefined
+  ) => {
     e.preventDefault();
     setListEvent("click");
     if (index === undefined) {
@@ -235,7 +244,11 @@ const FilterList = memo(function FilterList({
 
     listEvent && selectNextLi(activeLi);
     if (listEvent === "jumpTop" || listEvent === "jumpBottom") {
-      ul && ul.scrollIntoView({ block: listEvent === "jumpTop" ? "start" : "end", behavior: "smooth" });
+      ul &&
+        ul.scrollIntoView({
+          block: listEvent === "jumpTop" ? "start" : "end",
+          behavior: "smooth",
+        });
     }
   }, [activeLi, listEvent]);
 
@@ -251,14 +264,15 @@ const FilterList = memo(function FilterList({
   useEffect(() => {
     const handleBlur = () => setListEvent(null);
     const div = divRef?.current;
-    div?.addEventListener('blur', handleBlur);
-    return () => div?.removeEventListener('blur', handleBlur);
-  }, [])
+    div?.addEventListener("blur", handleBlur);
+    return () => div?.removeEventListener("blur", handleBlur);
+  }, []);
 
   return (
     <div
       tabIndex={0}
-      className="h-full w-full overflow-y-scroll border-2 border-slate-800 bg-slate-800 focus:border-2"
+      // className="h-full w-full overflow-y-scroll border-2 border-slate-800 bg-slate-800 focus:border-2"
+      className="h-full w-full overflow-y-scroll border-2 focus:border-2"
       onKeyDown={handleKeyDown}
       ref={divRef}
     >

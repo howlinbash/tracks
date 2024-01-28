@@ -148,15 +148,23 @@ export const Table = <T,>({
   return (
     <>
       <div
-        className="relative ml-4 max-h-full w-[calc(100%-32px)] border-2 border-slate-800 bg-slate-800 focus:border-2"
+        // className="relative ml-4 max-h-full w-[calc(100%-32px)] border-2 border-slate-800 bg-slate-800 focus:border-2"
+        className="relative ml-4 max-h-full w-[calc(100%-32px)] border-2 focus:border-2"
         onKeyDown={handleKeyDown}
         tabIndex={0}
       >
-        <table className="absolute flex h-full w-full flex-col bg-slate-800">
-          <thead className="top-0 bg-slate-800">
+        <table
+          // className="absolute flex h-full w-full flex-col bg-slate-800"
+          className="absolute flex h-full w-full flex-col"
+        >
+          <thead
+            // className="top-0 bg-slate-800"
+            className="top-0"
+          >
             {table.getHeaderGroups().map((headerGroup) => (
               <tr
-                className="grid w-full grid-cols-[auto_3fr_4fr_5fr] border-b border-stone-200 py-2 pl-6 text-left"
+                // className="grid w-full grid-cols-[auto_3fr_4fr_5fr] border-b border-stone-200 py-2 pl-6 text-left"
+                className="grid w-full grid-cols-[auto_3fr_4fr_5fr] border-b py-2 pl-6 text-left"
                 key={headerGroup.id}
               >
                 {headerGroup.headers.map((header, i) => (
@@ -165,7 +173,7 @@ export const Table = <T,>({
                       ? null
                       : flexRender(
                           header.column.columnDef.header,
-                          header.getContext(),
+                          header.getContext()
                         )}
                   </th>
                 ))}
@@ -218,7 +226,7 @@ export const useSongTable = (songs: Song[] | undefined) => {
 export const useKeyBindings = (
   songs: Song[] | undefined,
   bodyRef: RefObject<HTMLTableSectionElement> | undefined,
-  scrollToIndex: ScrollToIndex | undefined,
+  scrollToIndex: ScrollToIndex | undefined
 ) => {
   const [activeRow, setActiveRow] = useState<number | null>(null);
   const [isPrompting, setIsPrompting] = useState(false);

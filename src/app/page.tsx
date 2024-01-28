@@ -11,7 +11,7 @@ export default async function Home() {
   const filterGraph = await api.filter.getFilterGraph.query();
 
   return (
-    <main className="grid h-screen w-full grid-rows-[auto_1fr_1fr] gap-4 py-4">
+    <main className="grid h-screen w-full grid-rows-[auto_1fr_1fr] gap-4 bg-primary py-4 text-primary-foreground">
       <div className="grid w-full grid-cols-[1fr_1fr_1fr] items-center">
         <h2 className="pl-5">Howlin Tracks</h2>
         <SongCount />

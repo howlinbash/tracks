@@ -59,7 +59,7 @@ const Prompt = ({ setIsPrompting, song }: PromptProps) => {
           className="col-span-1 flex flex-col items-center justify-center font-semibold text-blue-700"
           onClick={handleClick}
         >
-          Request
+          Sing
         </button>
       </div>
     </Lightbox>

@@ -9,8 +9,8 @@
   body {
     @apply bg-background text-foreground;
     @apply h-full w-full;
-    @apply m-0 bg-slate-900 text-stone-200;
-    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    /* @apply m-0 bg-slate-900 text-stone-200; */
+    /* font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; */
   }
 }
 
