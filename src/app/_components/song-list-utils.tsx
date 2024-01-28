@@ -71,7 +71,7 @@ export const TableRow = <T,>({
   return (
     <tr
       className={`grid w-full grid-cols-[auto_3fr_4fr_5fr] py-1 pl-6 text-left ${
-        active && "bg-blue-500"
+        active && "bg-primary text-primary-foreground"
       }`}
       onClick={(e) => handleClick(e, index)}
       ref={rowRef}
@@ -115,7 +115,7 @@ export const VirtualTableRow = <T,>({
     <tr
       className={`absolute left-0 top-0 grid w-full grid-cols-[auto_3fr_4fr_5fr] py-1 pl-6 text-left h-[${
         vRow.size
-      }px]  ${active && "bg-blue-500"}`}
+      }px]  ${active && "bg-primary text-primary-foreground"}`}
       key={index}
       onClick={(e) => handleClick(e, index)}
       ref={rowRef}
@@ -148,7 +148,7 @@ export const Table = <T,>({
   return (
     <>
       <div
-        className="relative max-h-full w-full border-background bg-moreMuted"
+        className="relative max-h-full w-full bg-moreMuted text-fg5"
         onKeyDown={handleKeyDown}
         tabIndex={0}
       >

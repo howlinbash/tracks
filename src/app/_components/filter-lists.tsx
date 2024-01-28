@@ -74,7 +74,7 @@ const CategoryFilterLi = ({
     <li key={filter?.id ?? 0} ref={liRef}>
       <div
         className={`m-0 w-full py-1 pl-4 pr-0 text-left ${
-          (active ?? filter?.active) && "bg-blue-500"
+          (active ?? filter?.active) && "bg-primary text-primary-foreground"
         }`}
         onClick={(e) => handleClick(e, index)}
       >

@@ -5,24 +5,30 @@ import FilterListLoader from "./_components/filter-list-loader";
 import SongListLoader from "./_components/song-list-loader";
 import SongCount from "./_components/song-count";
 import Tubes from "./_components/tubes";
+import { Sidebar } from "./_components/sidebar";
 
 export default async function Home() {
   const songs = await api.song.getSongs.query();
   const filterGraph = await api.filter.getFilterGraph.query();
 
   return (
-    <main className="grid h-screen w-full grid-rows-[auto_1fr_1fr] gap-4 p-4">
-      <div className="grid w-full grid-cols-[1fr_1fr_1fr] items-center">
+    <div className="grid h-screen w-full grid-rows-[auto_1fr] gap-4">
+      <header className="grid w-full grid-cols-[1fr_1fr_1fr] items-center pt-4">
         <h2 className="pl-5">Howlin Tracks</h2>
         <SongCount />
         <Tubes />
+      </header>
+      <div className="grid w-full grid-cols-[auto_1fr] gap-4">
+        <Sidebar className="w-52 bg-moreMuted" />
+        <main className="grid h-full w-full grid-rows-2 gap-4 pb-4 pr-4">
+          <FilterListLoader>
+            <FilterListsServer filterGraph={filterGraph} />
+          </FilterListLoader>
+          <SongListLoader>
+            <SongListServer songs={songs} />
+          </SongListLoader>
+        </main>
       </div>
-      <FilterListLoader>
-        <FilterListsServer filterGraph={filterGraph} />
-      </FilterListLoader>
-      <SongListLoader>
-        <SongListServer songs={songs} />
-      </SongListLoader>
-    </main>
+    </div>
   );
 }
