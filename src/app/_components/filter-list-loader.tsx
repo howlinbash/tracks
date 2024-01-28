@@ -11,12 +11,7 @@ type SwitcherProps = {
 const FilterListLoader = ({ children }: SwitcherProps) => {
   const { data, isLoading } = api.filter.getFilterGraph.useQuery();
 
-  console.log({ data });
-  return (
-    <div className="grid h-[45vh] w-full grid-cols-[1fr_1fr_1fr] gap-4 px-4">
-      {isLoading ? children : <FilterLists filterGraph={data!} />}
-    </div>
-  );
+  return isLoading ? children : <FilterLists filterGraph={data!} />;
 };
 
 export default FilterListLoader;

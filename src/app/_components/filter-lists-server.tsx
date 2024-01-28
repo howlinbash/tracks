@@ -19,16 +19,24 @@ const FilterLi = ({ category, filter }: FilterLiServerProps) => {
   );
 };
 
-const FilterListsServer = ({ filterGraph }: FilterListsProps) =>
-  Object.entries(filterGraph).map(([category, graph]) => (
-    <div className="h-full w-full overflow-y-scroll">
-      <ul className="list-none p-0">
-        <FilterLi category={category as Category} />
-        {graph.allIds.map((id) => (
-          <FilterLi category={category as Category} filter={graph.byId[id]} />
-        ))}
-      </ul>
+const FilterListsServer = ({ filterGraph }: FilterListsProps) => (
+  <div className="relative h-full w-full">
+    <div className="absolute grid h-full w-full grid-cols-[1fr_1fr_1fr] gap-4">
+      {Object.entries(filterGraph).map(([category, graph]) => (
+        <div className="h-full w-full overflow-y-scroll">
+          <ul className="list-none p-0">
+            <FilterLi category={category as Category} />
+            {graph.allIds.map((id) => (
+              <FilterLi
+                category={category as Category}
+                filter={graph.byId[id]}
+              />
+            ))}
+          </ul>
+        </div>
+      ))}
     </div>
-  ));
+  </div>
+);
 
 export default FilterListsServer;

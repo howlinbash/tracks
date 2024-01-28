@@ -271,8 +271,7 @@ const FilterList = memo(function FilterList({
   return (
     <div
       tabIndex={0}
-      // className="h-full w-full overflow-y-scroll border-2 border-slate-800 bg-slate-800 focus:border-2"
-      className="h-full w-full overflow-y-scroll border-2 focus:border-2"
+      className="h-full w-full overflow-y-scroll border-background bg-moreMuted"
       onKeyDown={handleKeyDown}
       ref={divRef}
     >
@@ -321,15 +320,21 @@ const FilterLists = ({ filterGraph }: FilterListsProps) => {
     postFilter.mutate(filters);
   }, [filters]);
 
-  return CategoryMap.map((category) => (
-    <FilterList
-      key={category}
-      category={category as Category}
-      filterGraph={filterGraph}
-      filters={filters}
-      setFilters={setFilters}
-    />
-  ));
+  return (
+    <div className="relative h-full w-full">
+      <div className="absolute grid h-full w-full grid-cols-[1fr_1fr_1fr] gap-4">
+        {CategoryMap.map((category) => (
+          <FilterList
+            key={category}
+            category={category as Category}
+            filterGraph={filterGraph}
+            filters={filters}
+            setFilters={setFilters}
+          />
+        ))}
+      </div>
+    </div>
+  );
 };
 
 export default FilterLists;

@@ -2,17 +2,17 @@
 @tailwind components;
 @tailwind utilities;
 
-@layer base {
-  * {
-    @apply border-border;
-  }
-  body {
-    @apply bg-background text-foreground;
-    @apply h-full w-full;
-    /* @apply m-0 bg-slate-900 text-stone-200; */
-    /* font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; */
-  }
-}
+/* @layer base { */
+/*   * { */
+/*     @apply border-border; */
+/*   } */
+/*   body { */
+/*     @apply bg-background text-foreground; */
+/*     @apply h-full w-full; */
+/*     /1* @apply m-0 bg-slate-900 text-stone-200; *1/ */
+/*     /1* font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; *1/ */
+/*   } */
+/* } */
 
 /* html, */
 /* body { */
@@ -52,7 +52,6 @@
 
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
-    /* --ring: 222.2 84% 4.9%; */
     --ring: 221.2 83.2% 53.3%;
 
     --radius: 0.5rem;
@@ -65,7 +64,6 @@
     --popover: 222.2 84% 4.9%;
     --popover-foreground: 210 40% 98%;
 
-    /* --primary: 210 40% 98%; */
     --primary: 217.2 91.2% 59.8%;
     --primary-foreground: 222.2 47.4% 11.2%;
 
@@ -73,6 +71,7 @@
     --secondary-foreground: 210 40% 98%;
 
     --muted: 217.2 32.6% 17.5%;
+    --moreMuted: 219.7 40% 14.35%;
     --muted-foreground: 215 20.2% 65.1%;
 
     --accent: 217.2 32.6% 17.5%;
@@ -83,11 +82,20 @@
 
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
-    /* --ring: 212.7 26.8% 83.9%; */
     --ring: 224.3 76.3% 48%;
 
     --card: 222.2 84% 4.9%;
     --card-foreground: 210 40% 98%;
+  }
+
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    @apply h-full w-full;
+    /* @apply m-0 bg-slate-900 text-stone-200; */
+    /* font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; */
   }
 }
 

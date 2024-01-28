@@ -148,22 +148,14 @@ export const Table = <T,>({
   return (
     <>
       <div
-        // className="relative ml-4 max-h-full w-[calc(100%-32px)] border-2 border-slate-800 bg-slate-800 focus:border-2"
-        className="relative ml-4 max-h-full w-[calc(100%-32px)] border-2 focus:border-2"
+        className="relative max-h-full w-full border-background bg-moreMuted"
         onKeyDown={handleKeyDown}
         tabIndex={0}
       >
-        <table
-          // className="absolute flex h-full w-full flex-col bg-slate-800"
-          className="absolute flex h-full w-full flex-col"
-        >
-          <thead
-            // className="top-0 bg-slate-800"
-            className="top-0"
-          >
+        <table className="absolute flex h-full w-full flex-col">
+          <thead className="top-0">
             {table.getHeaderGroups().map((headerGroup) => (
               <tr
-                // className="grid w-full grid-cols-[auto_3fr_4fr_5fr] border-b border-stone-200 py-2 pl-6 text-left"
                 className="grid w-full grid-cols-[auto_3fr_4fr_5fr] border-b py-2 pl-6 text-left"
                 key={headerGroup.id}
               >

@@ -20,6 +20,7 @@ const config = {
     "./components/**/*.{ts,tsx}",
     "./app/**/*.{ts,tsx}",
     "./src/**/*.{ts,tsx}",
+    "./@/**/*.{ts,tsx}",
   ],
   prefix: "",
   theme: {
@@ -52,6 +53,9 @@ const config = {
         muted: {
           DEFAULT: "hsl(var(--muted))",
           foreground: "hsl(var(--muted-foreground))",
+        },
+        moreMuted: {
+          DEFAULT: "hsl(var(--moreMuted))",
         },
         accent: {
           DEFAULT: "hsl(var(--accent))",
