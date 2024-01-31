@@ -22,6 +22,13 @@ enum EraEnum {
   N_A
 }
 
+enum LibraryEnum {
+  ALL
+  ONLINE
+  OFFLINE
+  WISHLIST
+}
+
 model Song {
   id       Int      @id @default(autoincrement())
   label    String
@@ -87,9 +94,7 @@ model Tube {
   @@map("tubes")
 }
 
-model Tubes {
+model Ui {
   id       Int  @id @default(autoincrement())
-  tubes    Boolean
-
-  @@map("Tubies")
+  library  LibraryEnum @default(ALL)
 }

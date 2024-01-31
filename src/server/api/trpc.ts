@@ -6,7 +6,7 @@
  * TL;DR - This is where all the tRPC server stuff is created and plugged in. The pieces you will
  * need to use are documented accordingly near the end.
  */
-import { initTRPC } from "@trpc/server";
+import { inferAsyncReturnType, initTRPC } from "@trpc/server";
 import superjson from "superjson";
 import { ZodError } from "zod";
 
@@ -31,6 +31,10 @@ export const createTRPCContext = async (opts: { headers: Headers }) => {
   };
 };
 
+export type CreateContext = typeof createTRPCContext;
+// export type Context = ReturnType<typeof createTRPCContext>;
+// export type C = inferAsyncReturnType<ReturnType<typeof createTRPCContext>>;
+export type Context = Awaited<ReturnType<typeof createTRPCContext>>;
 /**
  * 2. INITIALIZATION
  *

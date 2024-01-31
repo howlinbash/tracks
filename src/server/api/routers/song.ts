@@ -1,6 +1,7 @@
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
+import { pickLibraryWhere } from "~/server/lib";
 
-type WhereSongs = {
+type WhereFilters = {
   eraId?: number;
   genreId?: number;
   artistId?: number;
@@ -16,18 +17,23 @@ export const songRouter = createTRPCRouter({
       },
     });
 
-    const whereSongs: WhereSongs = {};
+    const whereFilters: WhereFilters = {};
 
     if (filters) {
       Object.entries(filters).forEach((cat) => {
         if (cat[1]) {
-          whereSongs[cat[0] as keyof WhereSongs] = cat[1];
+          whereFilters[cat[0] as keyof WhereFilters] = cat[1];
         }
       });
     }
 
+    const library = await ctx.db.ui.findFirst({});
+    const whereLibrary = pickLibraryWhere(library?.library);
     const songs = await ctx.db.song.findMany({
-      where: whereSongs,
+      where: {
+        ...whereFilters,
+        ...whereLibrary,
+      },
       select: {
         id: true,
         label: true,
@@ -49,34 +55,19 @@ export const songRouter = createTRPCRouter({
         },
         tubes: true,
       },
+      orderBy: {
+        id: "asc",
+      },
     });
 
-    const tubes = await ctx.db.tubes.findFirst({
-      select: { tubes: true },
-    });
-
-    if (!tubes?.tubes) {
-      return songs.map((song) => ({
-        id: song.id,
-        song: song.label,
-        path: song.path,
-        era: song.era.label,
-        genre: song.genre.label,
-        artist: song.artist.label,
-        tubes: song.tubes ?? [],
-      }));
-    }
-
-    return songs
-      .filter((song) => song.tubes.length > 0)
-      .map((song) => ({
-        id: song.id,
-        song: song.label,
-        path: song.path,
-        era: song.era.label,
-        genre: song.genre.label,
-        artist: song.artist.label,
-        tubes: song.tubes ?? [],
-      }));
+    return songs.map((song) => ({
+      id: song.id,
+      song: song.label,
+      path: song.path,
+      era: song.era.label,
+      genre: song.genre.label,
+      artist: song.artist.label,
+      tubes: song.tubes ?? [],
+    }));
   }),
 });

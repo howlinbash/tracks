@@ -4,7 +4,7 @@ import FilterListsServer from "./_components/filter-lists-server";
 import FilterListLoader from "./_components/filter-list-loader";
 import SongListLoader from "./_components/song-list-loader";
 import SongCount from "./_components/song-count";
-import Tubes from "./_components/tubes";
+import { ModeToggle } from "./_components/mode-toggle";
 import { Sidebar } from "./_components/sidebar";
 
 export default async function Home() {
@@ -16,7 +16,9 @@ export default async function Home() {
       <header className="grid w-full grid-cols-[1fr_1fr_1fr] items-center pt-4">
         <h2 className="pl-5">Howlin Tracks</h2>
         <SongCount />
-        <Tubes />
+        <div className="flex justify-end pr-4">
+          <ModeToggle />
+        </div>
       </header>
       <div className="grid w-full grid-cols-[auto_1fr] gap-4">
         <Sidebar className="w-52 bg-moreMuted" />

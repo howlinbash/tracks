@@ -1,8 +1,14 @@
 import { z } from "zod";
-import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
+import {
+  type Context,
+  createTRPCRouter,
+  publicProcedure,
+} from "~/server/api/trpc";
 import { ERAS, GENRES, ARTISTS } from "~/constants";
 import type { Record } from "@prisma/client/runtime/library";
 import type { Artist, Era, Genre } from "@prisma/client";
+import { LibraryEnum } from "@prisma/client";
+import { pickLibraryWhere } from "~/server/lib";
 
 type WhereSongs = {
   eraId?: number;
@@ -32,8 +38,6 @@ type FilterSets = {
   eras: Record<string, EraGraph<Set<number>>>;
   genres: Record<string, GenreGraph<Set<number>>>;
 };
-
-const category = z.literal(ERAS).or(z.literal(GENRES)).or(z.literal(ARTISTS));
 
 /*
  * Unitl I improve my typing, use this map to navigate the graphs
@@ -89,6 +93,56 @@ const category = z.literal(ERAS).or(z.literal(GENRES)).or(z.literal(ARTISTS));
  *
  */
 
+const category = z.literal(ERAS).or(z.literal(GENRES)).or(z.literal(ARTISTS));
+
+const filterSelector = async (ctx: Context, library: LibraryEnum) => {
+  if (library === LibraryEnum.ONLINE) {
+    const where = { where: { songs: { some: { tubes: { some: {} } } } } };
+    return {
+      eras: await ctx.db.era.findMany(where),
+      genres: await ctx.db.genre.findMany(where),
+      artists: await ctx.db.artist.findMany(where),
+    };
+  }
+  if (library === LibraryEnum.OFFLINE) {
+    const where = {
+      where: {
+        OR: [
+          { songs: { some: { ktv: true } } },
+          { songs: { some: { tubes: { some: {} } } } },
+        ],
+      },
+    };
+    return {
+      eras: await ctx.db.era.findMany(where),
+      genres: await ctx.db.genre.findMany(where),
+      artists: await ctx.db.artist.findMany(where),
+    };
+  }
+  if (library === LibraryEnum.WISHLIST) {
+    const where = {
+      where: {
+        songs: {
+          some: {
+            ktv: null,
+            tubes: { none: {} },
+          },
+        },
+      },
+    };
+    return {
+      eras: await ctx.db.era.findMany(where),
+      genres: await ctx.db.genre.findMany(where),
+      artists: await ctx.db.artist.findMany(where),
+    };
+  }
+  return {
+    eras: await ctx.db.era.findMany(),
+    genres: await ctx.db.genre.findMany(),
+    artists: await ctx.db.artist.findMany(),
+  };
+};
+
 export const filterRouter = createTRPCRouter({
   getFilterGraph: publicProcedure.query(async ({ ctx }) => {
     const filterGraph: FilterGraph = {
@@ -105,11 +159,16 @@ export const filterRouter = createTRPCRouter({
         byId: {},
       },
     };
-    const filterSets: FilterSets = {
-      eras: {},
-      genres: {},
-    };
-    const bongs = await ctx.db.song.findMany({
+
+    const filterSets: FilterSets = { eras: {}, genres: {} };
+
+    const library = await ctx.db.ui.findFirst({});
+    const whereLibrary = pickLibraryWhere(library?.library);
+
+    const songs = await ctx.db.song.findMany({
+      where: {
+        ...whereLibrary,
+      },
       select: {
         id: true,
         label: true,
@@ -122,41 +181,11 @@ export const filterRouter = createTRPCRouter({
       },
     });
 
-    const tubes = await ctx.db.tubes.findFirst({
-      select: { tubes: true },
-    });
-
-    const tubeSelector = {
-      where: {
-        songs: {
-          some: {
-            tubes: {
-              some: {},
-            },
-          },
-        },
-      },
-    };
-    const eras = !tubes?.tubes
-      ? await ctx.db.era.findMany({})
-      : await ctx.db.era.findMany(tubeSelector);
-    const genres = !tubes?.tubes
-      ? await ctx.db.genre.findMany({})
-      : await ctx.db.genre.findMany(tubeSelector);
-    const artists = !tubes?.tubes
-      ? await ctx.db.artist.findMany({})
-      : await ctx.db.artist.findMany(tubeSelector);
-
-    const songs = !tubes?.tubes
-      ? bongs
-      : bongs.filter((song) => song.tubes.length > 0);
-
-    console.log({
-      tubes: tubes?.tubes,
-      eras: eras.length,
-      genres: genres.length,
-      artists: artists.length,
-    });
+    const filters = await filterSelector(
+      ctx,
+      library?.library ?? LibraryEnum.ALL
+    );
+    const { eras, genres, artists } = filters;
 
     eras.forEach((era) => {
       filterGraph.eras.allIds.push(era.id);
