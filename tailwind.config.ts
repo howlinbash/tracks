@@ -1,17 +1,4 @@
 import { type Config } from "tailwindcss";
-// import { fontFamily } from "tailwindcss/defaultTheme";
-
-// export default {
-//   content: ["./src/**/*.tsx"],
-//   theme: {
-//     extend: {
-//       fontFamily: {
-//         sans: ["var(--font-sans)", ...fontFamily.sans],
-//       },
-//     },
-//   },
-//   plugins: [],
-// } satisfies Config;
 
 const config = {
   darkMode: ["class"],
@@ -38,11 +25,6 @@ const config = {
         ring: "hsl(var(--ring))",
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
-        fg1: "hsl(var(--fg1))",
-        fg2: "hsl(var(--fg2))",
-        fg3: "hsl(var(--fg3))",
-        fg4: "hsl(var(--fg4))",
-        fg5: "hsl(var(--fg5))",
         primary: {
           DEFAULT: "hsl(var(--primary))",
           foreground: "hsl(var(--primary-foreground))",
@@ -58,18 +40,6 @@ const config = {
         muted: {
           DEFAULT: "hsl(var(--muted))",
           foreground: "hsl(var(--muted-foreground))",
-        },
-        moreMuted: {
-          DEFAULT: "hsl(var(--moreMuted))",
-        },
-        muted1: {
-          DEFAULT: "hsl(var(--muted1))",
-        },
-        muted2: {
-          DEFAULT: "hsl(var(--muted2))",
-        },
-        muted3: {
-          DEFAULT: "hsl(var(--muted3))",
         },
         accent: {
           DEFAULT: "hsl(var(--accent))",

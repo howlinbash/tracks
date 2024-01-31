@@ -271,7 +271,7 @@ const FilterList = memo(function FilterList({
   return (
     <div
       tabIndex={0}
-      className="h-full w-full overflow-y-scroll border-background bg-moreMuted"
+      className="h-full w-full overflow-y-scroll border-background bg-muted"
       onKeyDown={handleKeyDown}
       ref={divRef}
     >

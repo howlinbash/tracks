@@ -148,7 +148,7 @@ export const Table = <T,>({
   return (
     <>
       <div
-        className="relative max-h-full w-full bg-moreMuted text-fg5"
+        className="relative max-h-full w-full bg-muted text-fg5"
         onKeyDown={handleKeyDown}
         tabIndex={0}
       >

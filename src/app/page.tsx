@@ -21,7 +21,7 @@ export default async function Home() {
         </div>
       </header>
       <div className="grid w-full grid-cols-[auto_1fr] gap-4">
-        <Sidebar className="w-52 bg-moreMuted" />
+        <Sidebar className="w-52 bg-muted" />
         <main className="grid h-full w-full grid-rows-2 gap-4 pb-4 pr-4">
           <FilterListLoader>
             <FilterListsServer filterGraph={filterGraph} />
