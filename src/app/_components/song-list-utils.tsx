@@ -26,6 +26,8 @@ import {
 } from "react";
 import { page } from "../_utils";
 import Prompt from "./prompt";
+import { contextProps } from "@trpc/react-query/shared";
+import { throws } from "assert";
 
 const InnerTableRow = <T,>({ row }: InnerTableRowProps<T>) =>
   row.getVisibleCells().map((cell, i) => (
@@ -148,7 +150,7 @@ export const Table = <T,>({
   return (
     <>
       <div
-        className="relative max-h-full w-full bg-muted text-fg5"
+        className="text-fg5 relative max-h-full w-full bg-muted"
         onKeyDown={handleKeyDown}
         tabIndex={0}
       >
@@ -235,6 +237,13 @@ export const useKeyBindings = (
     const bRc = bodyRef?.current;
 
     if (event.key === "Enter") {
+      if (isPrompting) {
+        if (activeRow === null) throw Error("Prompting without song");
+        if (songs === undefined) throw Error("Prompting without songs");
+        const song = songs[activeRow];
+        const url = song?.tubes[0]?.url;
+        url && window.open(url, "_blank");
+      }
       setIsPrompting((p) => !p);
     }
 
