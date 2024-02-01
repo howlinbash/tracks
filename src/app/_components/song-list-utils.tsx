@@ -117,7 +117,7 @@ export const VirtualTableRow = <T,>({
         vRow.size
       }px]  ${active && "bg-primary text-primary-foreground"}`}
       key={index}
-      onClick={(e) => handleClick(e, index)}
+      onClick={(e) => handleClick(e, vRow.index)}
       ref={rowRef}
       style={{ transform: `translateY(${vRow.start}px)` }}
     >
