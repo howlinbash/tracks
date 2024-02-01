@@ -322,7 +322,7 @@ const FilterLists = ({ filterGraph }: FilterListsProps) => {
 
   return (
     <div className="relative h-full w-full">
-      <div className="absolute grid h-full w-full grid-cols-[1fr_1fr_1fr] gap-4">
+      <div className="absolute grid h-full w-full cursor-default grid-cols-[1fr_1fr_1fr] gap-4">
         {CategoryMap.map((category) => (
           <FilterList
             key={category}

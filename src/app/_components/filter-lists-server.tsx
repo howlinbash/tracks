@@ -21,7 +21,7 @@ const FilterLi = ({ category, filter }: FilterLiServerProps) => {
 
 const FilterListsServer = ({ filterGraph }: FilterListsProps) => (
   <div className="relative h-full w-full">
-    <div className="absolute grid h-full w-full grid-cols-[1fr_1fr_1fr] gap-4">
+    <div className="absolute grid h-full w-full cursor-default grid-cols-[1fr_1fr_1fr] gap-4">
       {Object.entries(filterGraph).map(([category, graph]) => (
         <div className="h-full w-full overflow-y-scroll">
           <ul className="list-none p-0">

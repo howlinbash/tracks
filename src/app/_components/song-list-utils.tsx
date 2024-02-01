@@ -152,7 +152,7 @@ export const Table = <T,>({
         onKeyDown={handleKeyDown}
         tabIndex={0}
       >
-        <table className="absolute flex h-full w-full flex-col">
+        <table className="absolute flex h-full w-full cursor-default flex-col">
           <thead className="top-0">
             {table.getHeaderGroups().map((headerGroup) => (
               <tr

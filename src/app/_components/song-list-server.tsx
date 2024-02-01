@@ -27,7 +27,7 @@ const SongRow = ({ song }: { song?: Song }) => (
 const SongListServer = ({ songs }: { songs: Song[] }) => {
   return (
     <div className="relative max-h-full w-full">
-      <table className="absolute flex h-full w-full flex-col">
+      <table className="absolute flex h-full w-full flex-col cursor-default">
         <thead className="top-0">
           <tr className="grid w-full grid-cols-[auto_3fr_4fr_5fr] border-b py-2 pl-6 text-left">
             <th className="w-16">Era</th>
