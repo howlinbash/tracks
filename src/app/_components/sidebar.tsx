@@ -45,7 +45,9 @@ export function Sidebar({ className }: React.HTMLAttributes<HTMLDivElement>) {
           <div className="space-y-1">
             <Button
               variant="ghost"
-              className="w-full justify-start"
+              className={`w-full justify-start ${
+                library === LibraryEnum.ALL && "bg-accent"
+              }`}
               onClick={() => handleLibraryClick(LibraryEnum.ALL)}
             >
               <Icons.library />
@@ -53,7 +55,9 @@ export function Sidebar({ className }: React.HTMLAttributes<HTMLDivElement>) {
             </Button>
             <Button
               variant="ghost"
-              className="w-full justify-start"
+              className={`w-full justify-start ${
+                library === LibraryEnum.ONLINE && "bg-accent"
+              }`}
               onClick={() => handleLibraryClick(LibraryEnum.ONLINE)}
             >
               <Icons.cloud />
@@ -61,7 +65,9 @@ export function Sidebar({ className }: React.HTMLAttributes<HTMLDivElement>) {
             </Button>
             <Button
               variant="ghost"
-              className="w-full justify-start"
+              className={`w-full justify-start ${
+                library === LibraryEnum.OFFLINE && "bg-accent"
+              }`}
               onClick={() => handleLibraryClick(LibraryEnum.OFFLINE)}
             >
               <Icons.laptop />
@@ -69,7 +75,9 @@ export function Sidebar({ className }: React.HTMLAttributes<HTMLDivElement>) {
             </Button>
             <Button
               variant="ghost"
-              className="w-full justify-start"
+              className={`w-full justify-start ${
+                library === LibraryEnum.WISHLIST && "bg-accent"
+              }`}
               onClick={() => handleLibraryClick(LibraryEnum.WISHLIST)}
             >
               <Icons.shoppingBag />

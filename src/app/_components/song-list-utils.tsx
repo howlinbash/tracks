@@ -158,7 +158,7 @@ export const Table = <T,>({
           <thead className="top-0">
             {table.getHeaderGroups().map((headerGroup) => (
               <tr
-                className="grid w-full grid-cols-[auto_3fr_4fr_5fr] border-b py-2 pl-6 text-left"
+                className="grid w-full grid-cols-[auto_3fr_4fr_5fr] border-b border-muted-foreground py-2 pl-6 text-left"
                 key={headerGroup.id}
               >
                 {headerGroup.headers.map((header, i) => (
