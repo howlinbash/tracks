@@ -7,6 +7,11 @@ import SongCount from "./_components/song-count";
 import { ModeToggle } from "./_components/mode-toggle";
 import { Sidebar } from "./_components/sidebar";
 import Github from "./_components/github";
+import {
+  ResizableHandle,
+  ResizablePanel,
+  ResizablePanelGroup,
+} from "@/components/ui/resizable";
 
 export default async function Home() {
   const songs = await api.song.getSongs.query();
@@ -24,14 +29,22 @@ export default async function Home() {
       </header>
       <div className="grid w-full grid-cols-[auto_1fr] gap-4">
         <Sidebar className="w-52 bg-muted" />
-        <main className="grid h-full w-full grid-rows-2 gap-4 pb-4 pr-4">
-          <FilterListLoader>
-            <FilterListsServer filterGraph={filterGraph} />
-          </FilterListLoader>
-          <SongListLoader>
-            <SongListServer songs={songs} />
-          </SongListLoader>
-        </main>
+        <ResizablePanelGroup
+          direction="vertical"
+          className="grid h-full w-full grid-rows-3 pb-4 pr-4"
+        >
+          <ResizablePanel className="mb-2 flex h-full">
+            <FilterListLoader>
+              <FilterListsServer filterGraph={filterGraph} />
+            </FilterListLoader>
+          </ResizablePanel>
+          <ResizableHandle className="border-red" />
+          <ResizablePanel className="mt-2 flex h-full">
+            <SongListLoader>
+              <SongListServer songs={songs} />
+            </SongListLoader>
+          </ResizablePanel>
+        </ResizablePanelGroup>
       </div>
     </div>
   );
