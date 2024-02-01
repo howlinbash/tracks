@@ -26,8 +26,6 @@ import {
 } from "react";
 import { page } from "../_utils";
 import Prompt from "./prompt";
-import { contextProps } from "@trpc/react-query/shared";
-import { throws } from "assert";
 
 const InnerTableRow = <T,>({ row }: InnerTableRowProps<T>) =>
   row.getVisibleCells().map((cell, i) => (

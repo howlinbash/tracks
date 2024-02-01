@@ -6,6 +6,7 @@ import SongListLoader from "./_components/song-list-loader";
 import SongCount from "./_components/song-count";
 import { ModeToggle } from "./_components/mode-toggle";
 import { Sidebar } from "./_components/sidebar";
+import Github from "./_components/github";
 
 export default async function Home() {
   const songs = await api.song.getSongs.query();
@@ -18,6 +19,7 @@ export default async function Home() {
         <SongCount />
         <div className="flex justify-end pr-4">
           <ModeToggle />
+          <Github />
         </div>
       </header>
       <div className="grid w-full grid-cols-[auto_1fr] gap-4">
