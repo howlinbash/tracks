@@ -301,6 +301,11 @@ export const useKeyBindings = (
     }
   };
 
+  // Wipe selected row when replacing lists (e.g. tapping through artists)
+  useEffect(() => {
+    setActiveRow(null);
+  }, [songs]);
+
   return {
     activeRow,
     bodyRef,
